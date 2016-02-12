@@ -23,7 +23,7 @@
 	<string name="ip_setting_label">Address</string>
 	<string name="port_setting_label">Port</string>
 	<string name="command_setting_label">Command</string>
-
+    <string name="connected_to">Connected to </string>
 	<string name="digits_increment">+</string>
 	<string name="digits_decrement">-</string>
 	<string name="address_dot">.</string>

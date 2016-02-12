@@ -1,4 +1,4 @@
-package com.camera.simplemjpeg;
+package com.bwarg.master;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -51,13 +51,13 @@ public class GeneralSettingsActivity extends ActionBarActivity {
         prefs.setIp_port(extras.getInt("ip_port" + camNum, prefs.getIp_port()));
     }
     private void putExtras(Intent intent, StreamPreferences prefs, int camNum){
-        intent.putExtra("width"+camNum, prefs.getWidth());
-        intent.putExtra("height"+camNum, prefs.getHeight());
-        intent.putExtra("ip_ad1"+camNum, prefs.getIp_ad1());
-        intent.putExtra("ip_ad2"+camNum, prefs.getIp_ad2());
-        intent.putExtra("ip_ad3"+camNum, prefs.getIp_ad3());
-        intent.putExtra("ip_ad4"+camNum, prefs.getIp_ad4());
-        intent.putExtra("ip_port"+camNum, prefs.getIp_port());
+        intent.putExtra("width" + camNum, prefs.getWidth());
+        intent.putExtra("height" + camNum, prefs.getHeight());
+        intent.putExtra("ip_ad1" + camNum, prefs.getIp_ad1());
+        intent.putExtra("ip_ad2" + camNum, prefs.getIp_ad2());
+        intent.putExtra("ip_ad3" + camNum, prefs.getIp_ad3());
+        intent.putExtra("ip_ad4" + camNum, prefs.getIp_ad4());
+        intent.putExtra("ip_port" + camNum, prefs.getIp_port());
     }
     public void openSettingsLeft(View v){
         Intent intent = new Intent(this, CamSettingsActivity.class);
@@ -87,5 +87,31 @@ public class GeneralSettingsActivity extends ActionBarActivity {
         settings_intent.putExtra("cam_number", 2);
         startActivityForResult(settings_intent, REQUEST_SETTINGS);
 
+    }
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_SETTINGS:
+                if (resultCode == Activity.RESULT_OK) {
+                    int cam_number = data.getIntExtra("cam_number", 1);
+                    if(cam_number == 1){ //left cam
+                        streamPrefLeft.setWidth(data.getIntExtra("width", streamPrefLeft.getWidth()));
+                        streamPrefLeft.setHeight(data.getIntExtra("height", streamPrefLeft.getHeight()));
+                        streamPrefLeft.setIp_ad1(data.getIntExtra("ip_ad1", streamPrefLeft.getIp_ad1()));
+                        streamPrefLeft.setIp_ad2(data.getIntExtra("ip_ad2", streamPrefLeft.getIp_ad2()));
+                        streamPrefLeft.setIp_ad3(data.getIntExtra("ip_ad3", streamPrefLeft.getIp_ad3()));
+                        streamPrefLeft.setIp_ad4(data.getIntExtra("ip_ad4", streamPrefLeft.getIp_ad4()));
+                        streamPrefLeft.setIp_port(data.getIntExtra("ip_port", streamPrefLeft.getIp_port()));
+                    }else if (cam_number == 2){ //right_cam
+                        streamPrefRight.setWidth(data.getIntExtra("width", streamPrefRight.getWidth()));
+                        streamPrefRight.setHeight(data.getIntExtra("height", streamPrefRight.getHeight()));
+                        streamPrefRight.setIp_ad1(data.getIntExtra("ip_ad1", streamPrefRight.getIp_ad1()));
+                        streamPrefRight.setIp_ad2(data.getIntExtra("ip_ad2", streamPrefRight.getIp_ad2()));
+                        streamPrefRight.setIp_ad3(data.getIntExtra("ip_ad3", streamPrefRight.getIp_ad3()));
+                        streamPrefRight.setIp_ad4(data.getIntExtra("ip_ad4", streamPrefRight.getIp_ad4()));
+                        streamPrefRight.setIp_port(data.getIntExtra("ip_port", streamPrefRight.getIp_port()));
+                    }
+                }
+                break;
+        }
     }
 }

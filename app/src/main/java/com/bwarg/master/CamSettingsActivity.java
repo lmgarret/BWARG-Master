@@ -1,6 +1,5 @@
-package com.camera.simplemjpeg;
+package com.bwarg.master;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -12,7 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.TextView.BufferType;
 
 public class CamSettingsActivity extends ActionBarActivity {

@@ -1,4 +1,4 @@
-package com.camera.simplemjpeg;
+package com.bwarg.master;
 
 /**
  * Created by LM on 10.02.2016.

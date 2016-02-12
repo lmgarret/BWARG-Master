@@ -2,7 +2,7 @@
 manifest
 ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:2:1-44:12
 	package
-		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:3:5-37
+		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:3:5-31
 		INJECTED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml
 		INJECTED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml
 	android:versionName
@@ -57,7 +57,7 @@ MERGED from [com.android.support:support-v4:22.2.1] D:\Google Drive\Projects\BWA
 		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:19:9-45
 	android:theme
 		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:21:9-40
-activity#com.camera.simplemjpeg.MjpegActivity
+activity#com.bwarg.master.MjpegActivity
 ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:22:9-32:20
 	android:screenOrientation
 		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:26:13-50
@@ -66,7 +66,7 @@ ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\An
 	android:configChanges
 		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:24:13-74
 	android:name
-		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:23:13-42
+		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:23:13-58
 intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
 ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:27:13-31:29
 action#android.intent.action.MAIN
@@ -77,7 +77,7 @@ category#android.intent.category.LAUNCHER
 ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:30:17-77
 	android:name
 		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:30:27-74
-activity#com.camera.simplemjpeg.CamSettingsActivity
+activity#com.bwarg.master.CamSettingsActivity
 ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:33:9-37:79
 	android:screenOrientation
 		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:36:13-49
@@ -86,12 +86,12 @@ ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\An
 	android:windowSoftInputMode
 		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:37:13-67
 	android:name
-		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:34:13-48
-activity#com.camera.simplemjpeg.GeneralSettingsActivity
+		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:34:13-64
+activity#com.bwarg.master.GeneralSettingsActivity
 ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:38:9-41:80
 	android:screenOrientation
 		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:40:13-49
 	android:label
 		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:41:13-68
 	android:name
-		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:39:13-52
+		ADDED from D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\src\main\AndroidManifest.xml:39:13-68

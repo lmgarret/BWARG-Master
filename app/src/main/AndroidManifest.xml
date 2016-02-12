@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.camera.simplemjpeg"
+    package="com.bwarg.master"
     android:versionCode="1"
     android:versionName="1.0">
 
@@ -20,7 +20,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MjpegActivity"
+            android:name="com.bwarg.master.MjpegActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="landscape">
@@ -31,12 +31,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".CamSettingsActivity"
+            android:name="com.bwarg.master.CamSettingsActivity"
             android:label="@string/settings"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|adjustResize"></activity>
         <activity
-            android:name=".GeneralSettingsActivity"
+            android:name="com.bwarg.master.GeneralSettingsActivity"
             android:screenOrientation="portrait"
             android:label="@string/title_activity_general_settings"></activity>
     </application>

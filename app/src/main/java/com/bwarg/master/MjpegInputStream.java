@@ -1,4 +1,4 @@
-package com.camera.simplemjpeg;
+package com.bwarg.master;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

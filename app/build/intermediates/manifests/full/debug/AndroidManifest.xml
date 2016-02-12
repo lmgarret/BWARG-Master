@@ -20,7 +20,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.camera.simplemjpeg.MjpegActivity"
+            android:name="com.bwarg.master.MjpegActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="landscape" >
@@ -31,12 +31,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.camera.simplemjpeg.CamSettingsActivity"
+            android:name="com.bwarg.master.CamSettingsActivity"
             android:label="@string/settings"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
-            android:name="com.camera.simplemjpeg.GeneralSettingsActivity"
+            android:name="com.bwarg.master.GeneralSettingsActivity"
             android:label="@string/title_activity_general_settings"
             android:screenOrientation="portrait" />
     </application>

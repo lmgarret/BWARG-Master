@@ -1,4 +1,4 @@
-package com.camera.simplemjpeg;
+package com.bwarg.master;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -48,12 +48,11 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
     private boolean suspending = false;
 
     private Bitmap bmp = null;
-
+    private int camNum = 1;
     // image size
 
     public int IMG_WIDTH = 640;
     public int IMG_HEIGHT = 480;
-
     public String current_error ="";
 
     public class MjpegViewThread extends Thread {
@@ -133,10 +132,14 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
                         if (bmp == null) {
                             bmp = Bitmap.createBitmap(IMG_WIDTH, IMG_HEIGHT, Bitmap.Config.ARGB_8888);
                         }
-                        int ret = mIn.readMjpegFrame(bmp);
-
-                        if (ret == -1) {
-                            ((MjpegActivity) saved_context).setImageError();
+                        //int ret = mIn.readMjpegFrame(bmp);
+                       /* if (ret == -1) {
+                            ((MjpegActivity) saved_context).setImageError(camNum);
+                            return;
+                        }*/
+                        bmp = mIn.readMjpegFrame();
+                        if(bmp == null){
+                            ((MjpegActivity) saved_context).setImageError(camNum);
                             return;
                         }
 
@@ -321,5 +324,13 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
 
     public boolean isStreaming() {
         return mRun;
+    }
+
+    public int getCamNum() {
+        return camNum;
+    }
+
+    public void setCamNum(int camNum) {
+        this.camNum = camNum;
     }
 }

@@ -26,12 +26,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <com.camera.simplemjpeg.MjpegView
+                <com.bwarg.master.MjpegView
                     android:id="@+id/mvLeft"
                     android:layout_width="320dp"
                     android:layout_height="match_parent" />
 
-                <com.camera.simplemjpeg.MjpegView
+                <com.bwarg.master.MjpegView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:id="@+id/mvRight"

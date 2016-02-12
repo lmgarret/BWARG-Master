@@ -1,4 +1,4 @@
-package com.camera.simplemjpeg;
+package com.bwarg.master;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -61,18 +60,20 @@ public class MjpegActivity extends ActionBarActivity {
 
         setContentView(R.layout.main);
         mvLeft = (MjpegView) findViewById(R.id.mvLeft);
+        mvLeft.setCamNum(1);
         if (mvLeft != null) {
             mvLeft.setResolution(streamPrefLeft.getWidth(), streamPrefLeft.getHeight());
         }
         tvLeft = (TextView) findViewById(R.id.tvLeft);
-        setTvLeft(getResources().getString(R.string.title_connecting));
+        setTv(1, getResources().getString(R.string.title_connecting));
 
         mvRight = (MjpegView) findViewById(R.id.mvRight);
+        mvRight.setCamNum(2);
         if (mvRight != null) {
             mvRight.setResolution(streamPrefRight.getWidth(), streamPrefRight.getHeight());
         }
         tvRight = (TextView) findViewById(R.id.tvRight);
-        setTvRight(getResources().getString(R.string.title_connecting));
+        setTv(2, getResources().getString(R.string.title_connecting));
         //new DoReadLeft().execute(streamPrefLeft.getURL());
         //new DoReadRight().execute(streamPrefRight.getURL());
         new DoReadLeft().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, streamPrefLeft.getURL());
@@ -204,14 +205,20 @@ public class MjpegActivity extends ActionBarActivity {
                 break;
         }
     }
-
-    public void setImageError() {
+    public void setImageError(final int camNum, final int string_ressource_id){
         handler.post(new Runnable() {
             @Override
             public void run() {
-                //setTitle(R.string.title_imageerror);
-                setTvLeft(getResources().getString(R.string.title_imageerror));
-                setTvRight(getResources().getString(R.string.title_imageerror));
+                    setTv(camNum,getResources().getString(string_ressource_id));
+                return;
+            }
+        });
+    }
+    public void setImageError(final int camNum) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                    setTv(camNum,getResources().getString(R.string.title_imageerror));
                 return;
             }
         });
@@ -256,10 +263,10 @@ public class MjpegActivity extends ActionBarActivity {
             if (result != null) {
                 result.setSkip(1);
                 //setTitle(R.string.app_name);
-                setTvLeft("Connected : "+streamPrefLeft.getURL());
+                setTv(1, getResources().getString(R.string.connected_to)+" "+streamPrefLeft.getURL());
             } else {
                 //setTitle(R.string.title_disconnected);
-                setTvLeft(getResources().getString(R.string.title_disconnected));
+                setTv(1, getResources().getString(R.string.title_disconnected));
 
             }
             mvLeft.setDisplayMode(MjpegView.SIZE_BEST_FIT);
@@ -305,10 +312,10 @@ public class MjpegActivity extends ActionBarActivity {
             if (result != null) {
                 result.setSkip(1);
                 //setTitle(R.string.app_name);
-                setTvRight("Connected : "+streamPrefLeft.getURL());
+                setTv(2, getResources().getString(R.string.connected_to)+" "+streamPrefLeft.getURL());
             } else {
                 //setTitle(R.string.title_disconnected);
-                setTvRight(getResources().getString(R.string.title_disconnected));
+                setTv(2, getResources().getString(R.string.title_disconnected));
 
             }
             mvRight.setDisplayMode(MjpegView.SIZE_BEST_FIT);
@@ -331,8 +338,8 @@ public class MjpegActivity extends ActionBarActivity {
         for (int i = 0; i< ip.length; i++){
             Log.d("MJPEG_Cam"+num, "arg"+i+" : "+ip[i]);
         }
-        StreamPreferences temp = new StreamPreferences(ip,prefs.getInt("width"+num, 640),prefs.getInt("height"+num, 480));
-        Log.d("MJPEG_Cam"+num, "URL "+temp.getURL()+" loaded at startup.");
+        StreamPreferences temp = new StreamPreferences(ip,prefs.getInt("width"+num, 640),prefs.getInt("height"+ num, 480));
+        Log.d("MJPEG_Cam" + num, "URL " + temp.getURL() + " loaded at startup.");
         return temp;
     }
     private void savePreferences(SharedPreferences.Editor editor, StreamPreferences streamPrefs, int num){
@@ -368,10 +375,14 @@ public class MjpegActivity extends ActionBarActivity {
         startActivityForResult(settings_intent, REQUEST_SETTINGS);
 
     }
-    public void setTvLeft(String text){
-        tvLeft.setText(text);
+    public void setTv(int camNum, String s){
+        if(camNum == 1){
+            tvLeft.setText(s);
+        }else if (camNum ==2){
+            tvRight.setText(s);
+        }
     }
-    public void setTvRight(String text){
-        tvRight.setText(text);
+    public void setTv(int camNum, int string_ressource_id){
+        setTv(camNum, getResources().getString(string_ressource_id));
     }
 }
