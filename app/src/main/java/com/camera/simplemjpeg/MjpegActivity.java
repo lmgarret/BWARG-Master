@@ -6,11 +6,14 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import org.apache.http.HttpResponse;
@@ -23,7 +26,7 @@ import org.apache.http.params.HttpParams;
 import java.io.IOException;
 import java.net.URI;
 
-public class MjpegActivity extends Activity {
+public class MjpegActivity extends ActionBarActivity {
     private static final boolean DEBUG = false;
     private static final String TAG = "MJPEG";
 
@@ -33,7 +36,7 @@ public class MjpegActivity extends Activity {
     private TextView tvLeft = null;
     private TextView tvRight = null;
 
-    // for settings (network and resolution)
+    // for cam_settings (network and resolution)
     private static final int REQUEST_SETTINGS = 0;
 
     private boolean suspending = false;
@@ -45,6 +48,11 @@ public class MjpegActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //getActionBar().hide();
+        //getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
+        //getActionBar().hide();
+        getSupportActionBar().hide();
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         SharedPreferences sharedPrefs = getSharedPreferences("SAVED_VALUES", MODE_PRIVATE);
 
         streamPrefLeft = loadPreferences(sharedPrefs, 1);
@@ -141,8 +149,8 @@ public class MjpegActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         /*switch (item.getItemId()) {
-            case R.id.settings:
-                Intent settings_intent = new Intent(MjpegActivity.this, SettingsActivity.class);
+            case R.id.cam_settings:
+                Intent settings_intent = new Intent(MjpegActivity.this, CamSettingsActivity.class);
                 settings_intent.putExtra("width", width);
                 settings_intent.putExtra("height", height);
                 settings_intent.putExtra("ip_ad1", ip_ad1);
@@ -160,32 +168,31 @@ public class MjpegActivity extends Activity {
         switch (requestCode) {
             case REQUEST_SETTINGS:
                 if (resultCode == Activity.RESULT_OK) {
-                    int cam_number = data.getIntExtra("cam_number", 1);
-                    if(cam_number == 1){ //left cam
-                        streamPrefLeft.setWidth(data.getIntExtra("width", streamPrefLeft.getWidth()));
-                        streamPrefLeft.setHeight(data.getIntExtra("height", streamPrefLeft.getHeight()));
-                        streamPrefLeft.setIp_ad1(data.getIntExtra("ip_ad1", streamPrefLeft.getIp_ad1()));
-                        streamPrefLeft.setIp_ad2(data.getIntExtra("ip_ad2", streamPrefLeft.getIp_ad2()));
-                        streamPrefLeft.setIp_ad3(data.getIntExtra("ip_ad3", streamPrefLeft.getIp_ad3()));
-                        streamPrefLeft.setIp_ad4(data.getIntExtra("ip_ad4", streamPrefLeft.getIp_ad4()));
-                        streamPrefLeft.setIp_port(data.getIntExtra("ip_port", streamPrefLeft.getIp_port()));
+                    //left cam
+                    streamPrefLeft.setWidth(data.getIntExtra("width1", streamPrefLeft.getWidth()));
+                    streamPrefLeft.setHeight(data.getIntExtra("height1", streamPrefLeft.getHeight()));
+                    streamPrefLeft.setIp_ad1(data.getIntExtra("ip_ad11", streamPrefLeft.getIp_ad1()));
+                    streamPrefLeft.setIp_ad2(data.getIntExtra("ip_ad21", streamPrefLeft.getIp_ad2()));
+                    streamPrefLeft.setIp_ad3(data.getIntExtra("ip_ad31", streamPrefLeft.getIp_ad3()));
+                    streamPrefLeft.setIp_ad4(data.getIntExtra("ip_ad41", streamPrefLeft.getIp_ad4()));
+                    streamPrefLeft.setIp_port(data.getIntExtra("ip_port1", streamPrefLeft.getIp_port()));
 
-                        if (mvLeft != null) {
-                            mvLeft.setResolution(streamPrefLeft.getWidth(), streamPrefLeft.getHeight());
-                        }
-                    }else if (cam_number == 2){ //right_cam
-                        streamPrefRight.setWidth(data.getIntExtra("width", streamPrefRight.getWidth()));
-                        streamPrefRight.setHeight(data.getIntExtra("height", streamPrefRight.getHeight()));
-                        streamPrefRight.setIp_ad1(data.getIntExtra("ip_ad1", streamPrefRight.getIp_ad1()));
-                        streamPrefRight.setIp_ad2(data.getIntExtra("ip_ad2", streamPrefRight.getIp_ad2()));
-                        streamPrefRight.setIp_ad3(data.getIntExtra("ip_ad3", streamPrefRight.getIp_ad3()));
-                        streamPrefRight.setIp_ad4(data.getIntExtra("ip_ad4", streamPrefRight.getIp_ad4()));
-                        streamPrefRight.setIp_port(data.getIntExtra("ip_port", streamPrefRight.getIp_port()));
-
-                        if (mvRight != null) {
-                            mvRight.setResolution(streamPrefRight.getWidth(), streamPrefRight.getHeight());
-                        }
+                    if (mvLeft != null) {
+                        mvLeft.setResolution(streamPrefLeft.getWidth(), streamPrefLeft.getHeight());
                     }
+                    //right_cam
+                    streamPrefRight.setWidth(data.getIntExtra("width2", streamPrefRight.getWidth()));
+                    streamPrefRight.setHeight(data.getIntExtra("height2", streamPrefRight.getHeight()));
+                    streamPrefRight.setIp_ad1(data.getIntExtra("ip_ad12", streamPrefRight.getIp_ad1()));
+                    streamPrefRight.setIp_ad2(data.getIntExtra("ip_ad22", streamPrefRight.getIp_ad2()));
+                    streamPrefRight.setIp_ad3(data.getIntExtra("ip_ad32", streamPrefRight.getIp_ad3()));
+                    streamPrefRight.setIp_ad4(data.getIntExtra("ip_ad42", streamPrefRight.getIp_ad4()));
+                    streamPrefRight.setIp_port(data.getIntExtra("ip_port2", streamPrefRight.getIp_port()));
+
+                    if (mvRight != null) {
+                        mvRight.setResolution(streamPrefRight.getWidth(), streamPrefRight.getHeight());
+                    }
+
                     SharedPreferences preferences = getSharedPreferences("SAVED_VALUES", MODE_PRIVATE);
                     SharedPreferences.Editor editor = preferences.edit();
                     savePreferences(editor, streamPrefLeft, 1);
@@ -335,19 +342,29 @@ public class MjpegActivity extends Activity {
         editor.putInt("ip_ad2"+num, streamPrefs.getIp_ad2());
         editor.putInt("ip_ad3"+num, streamPrefs.getIp_ad3());
         editor.putInt("ip_ad4"+num, streamPrefs.getIp_ad4());
-        editor.putInt("ip_port"+num, streamPrefs.getIp_port());
+        editor.putInt("ip_port" + num, streamPrefs.getIp_port());
     }
-    public void openSettingsLeft(View v){
-        Intent intent = new Intent(this, SettingsActivity.class);
-        Intent settings_intent = new Intent(MjpegActivity.this, SettingsActivity.class);
-        settings_intent.putExtra("width", streamPrefLeft.getWidth());
-        settings_intent.putExtra("height", streamPrefLeft.getHeight());
-        settings_intent.putExtra("ip_ad1", streamPrefLeft.getIp_ad1());
-        settings_intent.putExtra("ip_ad2", streamPrefLeft.getIp_ad2());
-        settings_intent.putExtra("ip_ad3", streamPrefLeft.getIp_ad3());
-        settings_intent.putExtra("ip_ad4", streamPrefLeft.getIp_ad4());
-        settings_intent.putExtra("ip_port", streamPrefLeft.getIp_port());
-        settings_intent.putExtra("cam_number", 1);
+    public void openSettings(View v){
+        Intent intent = new Intent(this, CamSettingsActivity.class);
+        Intent settings_intent = new Intent(MjpegActivity.this, GeneralSettingsActivity.class);
+        settings_intent.putExtra("width1", streamPrefLeft.getWidth());
+        settings_intent.putExtra("height1", streamPrefLeft.getHeight());
+        settings_intent.putExtra("ip_ad11", streamPrefLeft.getIp_ad1());
+        settings_intent.putExtra("ip_ad21", streamPrefLeft.getIp_ad2());
+        settings_intent.putExtra("ip_ad31", streamPrefLeft.getIp_ad3());
+        settings_intent.putExtra("ip_ad41", streamPrefLeft.getIp_ad4());
+        settings_intent.putExtra("ip_port1", streamPrefLeft.getIp_port());
+
+
+        settings_intent.putExtra("width2", streamPrefRight.getWidth());
+        settings_intent.putExtra("height2", streamPrefRight.getHeight());
+        settings_intent.putExtra("ip_ad12", streamPrefRight.getIp_ad1());
+        settings_intent.putExtra("ip_ad22", streamPrefRight.getIp_ad2());
+        settings_intent.putExtra("ip_ad32", streamPrefRight.getIp_ad3());
+        settings_intent.putExtra("ip_ad42", streamPrefRight.getIp_ad4());
+        settings_intent.putExtra("ip_port2", streamPrefRight.getIp_port());
+        //Log.d("MJPEG_Cam"+2, "sent to cam_settings : ip_port="+streamPrefRight.getIp_port());
+
         startActivityForResult(settings_intent, REQUEST_SETTINGS);
 
     }
@@ -356,20 +373,5 @@ public class MjpegActivity extends Activity {
     }
     public void setTvRight(String text){
         tvRight.setText(text);
-    }
-    public void openSettingsRight(View v){
-        Intent intent = new Intent(this, SettingsActivity.class);
-        Intent settings_intent = new Intent(MjpegActivity.this, SettingsActivity.class);
-        settings_intent.putExtra("width", streamPrefRight.getWidth());
-        settings_intent.putExtra("height", streamPrefRight.getHeight());
-        settings_intent.putExtra("ip_ad1", streamPrefRight.getIp_ad1());
-        settings_intent.putExtra("ip_ad2", streamPrefRight.getIp_ad2());
-        settings_intent.putExtra("ip_ad3", streamPrefRight.getIp_ad3());
-        settings_intent.putExtra("ip_ad4", streamPrefRight.getIp_ad4());
-        settings_intent.putExtra("ip_port", streamPrefRight.getIp_port());
-        Log.d("MJPEG_Cam"+2, "sent to settings : ip_port="+streamPrefRight.getIp_port());
-        settings_intent.putExtra("cam_number", 2);
-        startActivityForResult(settings_intent, REQUEST_SETTINGS);
-
     }
 }

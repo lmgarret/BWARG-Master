@@ -262,7 +262,7 @@ prepare_range_limit_table (j_decompress_ptr cinfo)
  *
  * Since jpeg_read_header has finished, we know what is in the SOF
  * and (first) SOS markers.  We also have all the application parameter
- * settings.
+ * cam_settings.
  */
 
 LOCAL(void)

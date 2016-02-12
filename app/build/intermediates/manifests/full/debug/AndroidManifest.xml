@@ -10,11 +10,15 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <android:uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <android:uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <android:uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" >
+        android:theme="@style/AppTheme" >
         <activity
             android:name="com.camera.simplemjpeg.MjpegActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -27,11 +31,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.camera.simplemjpeg.SettingsActivity"
+            android:name="com.camera.simplemjpeg.CamSettingsActivity"
             android:label="@string/settings"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden|adjustResize" >
-        </activity>
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+        <activity
+            android:name="com.camera.simplemjpeg.GeneralSettingsActivity"
+            android:label="@string/title_activity_general_settings"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

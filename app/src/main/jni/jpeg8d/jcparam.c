@@ -292,7 +292,7 @@ jpeg_set_defaults (j_compress_ptr cinfo)
 
   /* Allocate comp_info array large enough for maximum component count.
    * Array is made permanent in case application wants to compress
-   * multiple images at same param settings.
+   * multiple images at same param cam_settings.
    */
   if (cinfo->comp_info == NULL)
     cinfo->comp_info = (jpeg_component_info *)
@@ -580,7 +580,7 @@ jpeg_simple_progression (j_compress_ptr cinfo)
 
   /* Allocate space for script.
    * We need to put it in the permanent pool in case the application performs
-   * multiple compressions without changing the settings.  To avoid a memory
+   * multiple compressions without changing the cam_settings.  To avoid a memory
    * leak if jpeg_simple_progression is called repeatedly for the same JPEG
    * object, we try to re-use previously allocated space, and we allocate
    * enough space to handle YCbCr even if initially asked for grayscale.

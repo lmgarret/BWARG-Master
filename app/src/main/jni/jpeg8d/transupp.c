@@ -1338,7 +1338,7 @@ jtransform_adjust_parameters (j_decompress_ptr srcinfo,
 	  dstinfo->num_components == 1)) &&
 	srcinfo->comp_info[0].h_samp_factor == srcinfo->max_h_samp_factor &&
 	srcinfo->comp_info[0].v_samp_factor == srcinfo->max_v_samp_factor) {
-      /* We use jpeg_set_colorspace to make sure subsidiary settings get fixed
+      /* We use jpeg_set_colorspace to make sure subsidiary cam_settings get fixed
        * properly.  Among other things, it sets the target h_samp_factor &
        * v_samp_factor to 1, which typically won't match the source.
        * We have to preserve the source's quantization table number, however.

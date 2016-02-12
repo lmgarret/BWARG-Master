@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:textColorPrimary">@color/primary_text_material_light</item>
+        <item name="android:textColorPrimaryInverse">@color/primary_text_material_dark</item>
+        <item name="actionBarStyle">@style/ActionBarCompat</item>
+    </style>
+    <style name="ActionBarCompat" parent="@style/Widget.AppCompat.ActionBar">
+        <item name="titleTextStyle">@style/titleStyle</item>
+        <item name="background">@color/primary_material_dark</item>
+    </style>
+
+    <style name="titleStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="SettingsButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/settings_button_selector</item>
+    </style>
+
+
+</resources>

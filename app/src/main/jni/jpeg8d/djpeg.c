@@ -536,7 +536,7 @@ main (int argc, char **argv)
   file_index = parse_switches(&cinfo, argc, argv, 0, TRUE);
 
   /* Initialize the output module now to let it override any crucial
-   * option settings (for instance, GIF wants to force color quantization).
+   * option cam_settings (for instance, GIF wants to force color quantization).
    */
   switch (requested_fmt) {
 #ifdef BMP_SUPPORTED

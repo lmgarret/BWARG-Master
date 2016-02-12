@@ -330,7 +330,7 @@ start_input_ppm (j_compress_ptr cinfo, cjpeg_source_ptr sinfo)
   cinfo->image_width = (JDIMENSION) w;
   cinfo->image_height = (JDIMENSION) h;
 
-  /* initialize flags to most common settings */
+  /* initialize flags to most common cam_settings */
   need_iobuffer = TRUE;		/* do we need an I/O buffer? */
   use_raw_buffer = FALSE;	/* do we map input buffer onto I/O buffer? */
   need_rescale = TRUE;		/* do we need a rescale array? */

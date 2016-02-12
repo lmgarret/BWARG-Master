@@ -94,7 +94,7 @@ forward_DCT (j_compress_ptr cinfo, jpeg_component_info * compptr,
 	 * quotients, we have to force the dividend positive for portability.
 	 *
 	 * In most files, at least half of the output values will be zero
-	 * (at default quantization settings, more like three-quarters...)
+	 * (at default quantization cam_settings, more like three-quarters...)
 	 * so we should ensure that this case is fast.  On many machines,
 	 * a comparison is enough cheaper than a divide to make a special test
 	 * a win.  Since both inputs will be nonnegative, we need only test
