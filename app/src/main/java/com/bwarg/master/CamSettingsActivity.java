@@ -1,6 +1,8 @@
 package com.bwarg.master;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -48,6 +50,8 @@ public class CamSettingsActivity extends ActionBarActivity {
     int ip_ad4 = 1;
     int ip_port = 8080;
     int cam_number = 1;
+    public final static int REQUEST_SETTINGS_UDP = 1;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -409,5 +413,28 @@ public class CamSettingsActivity extends ActionBarActivity {
         sb.append(ip_port);
         sb.append(s_slash);
         return new String(sb);
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_SETTINGS_UDP:
+                if (resultCode == Activity.RESULT_OK) {
+                    ip_ad1 = data.getIntExtra("ip_ad1", ip_ad1);
+                    address1_input.setText(String.valueOf(ip_ad1), BufferType.NORMAL);
+                    ip_ad2 = data.getIntExtra("ip_ad2", ip_ad2);
+                    address2_input.setText(String.valueOf(ip_ad2), BufferType.NORMAL);
+                    ip_ad3 = data.getIntExtra("ip_ad3", ip_ad3);
+                    address3_input.setText(String.valueOf(ip_ad3), BufferType.NORMAL);
+                    ip_ad4 = data.getIntExtra("ip_ad4", ip_ad4);
+                    address4_input.setText(String.valueOf(ip_ad4), BufferType.NORMAL);
+                    ip_port = data.getIntExtra("ip_port", ip_port);
+                    port_input.setText(String.valueOf(ip_port), BufferType.NORMAL);
+                }
+                break;
+        }
+    }
+    public void openNetworkDiscovery(View v){
+        Intent intent = new Intent(this, DiscoverUDPActivity.class);
+        startActivityForResult(intent, REQUEST_SETTINGS_UDP);
     }
 }

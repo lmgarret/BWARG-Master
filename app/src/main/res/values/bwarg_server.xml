@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="port">8888</integer>
+    <string name="discover_request">DISCOVER_REQUEST</string>
+    <string name="discover_response">DISCOVER_RESPONSE</string>
+    <string name="name_request">NAME_REQUEST</string>
+    <string name="name_response">NAME_RESPONSE</string>
+    <string name="port_request">PORT_REQUEST</string>
+    <string name="port_response">PORT_RESPONSE</string>
+</resources>

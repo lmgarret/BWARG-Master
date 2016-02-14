@@ -2,13 +2,6 @@
 <items version="2" >
 
     <item
-        jar="D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\build\intermediates\exploded-aar\com.android.support\support-v4\22.2.1\jars\libs\internal_impl-22.2.1.jar"
-        jumboMode="false"
-        revision="22.0.1"
-        sha1="c471eaaba13ff64f6e0383d1c30a9cdc9a97efeb">
-        <dex dex="D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\build\intermediates\pre-dexed\debug\internal_impl-22.2.1_5934a5d6276ea20784e4c262ddd8be85decde80d.jar" />
-    </item>
-    <item
         jar="D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\22.0.0\jars\classes.jar"
         jumboMode="false"
         revision="22.0.1"
@@ -21,6 +14,13 @@
         revision="22.0.1"
         sha1="f8efd0096475e0daf054267b61544e10dc776503">
         <dex dex="D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\build\intermediates\pre-dexed\debug\com.android.support-support-v4-22.2.1_27fc06c424338a9544e339c4d63992f45f7c0ee6.jar" />
+    </item>
+    <item
+        jar="D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\build\intermediates\exploded-aar\com.android.support\support-v4\22.2.1\jars\libs\internal_impl-22.2.1.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="c471eaaba13ff64f6e0383d1c30a9cdc9a97efeb">
+        <dex dex="D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\build\intermediates\pre-dexed\debug\internal_impl-22.2.1_5934a5d6276ea20784e4c262ddd8be85decde80d.jar" />
     </item>
     <item
         jar="C:\Users\LM\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\22.2.1\support-annotations-22.2.1.jar"

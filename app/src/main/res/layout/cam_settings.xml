@@ -65,128 +65,157 @@
 
                 <!-- address1 -->
                 <LinearLayout
-                        android:orientation="vertical"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
-
-                        <Button android:id="@+id/address1_increment"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/digits_increment"/>
-
-                        <EditText
-                            android:id="@+id/address1_input"
-                            android:layout_width="60dp"
-                            android:layout_height="wrap_content"
-                            android:gravity="right|center_vertical"
-                            android:singleLine="true"
-                            android:inputType="number"
-                            android:maxLength="3"/>
-
-                        <Button
-                            android:id="@+id/address1_decrement"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/digits_decrement"/>
-                </LinearLayout>
-                <TextView
+                    android:orientation="vertical"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/address_dot"/>
+                    android:layout_height="match_parent"
+                    android:gravity="center_horizontal">
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_horizontal">
+
+                        <LinearLayout
+                                android:orientation="vertical"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content">
+
+                                <Button android:id="@+id/address1_increment"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/digits_increment"/>
+
+                                <EditText
+                                    android:id="@+id/address1_input"
+                                    android:layout_width="60dp"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="right|center_vertical"
+                                    android:singleLine="true"
+                                    android:inputType="number"
+                                    android:maxLength="3"/>
+
+                                <Button
+                                    android:id="@+id/address1_decrement"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/digits_decrement"/>
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/address_dot"/>
+
+                        <LinearLayout
+                                android:orientation="vertical"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content">
+
+                                <Button android:id="@+id/address2_increment"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/digits_increment"/>
+
+                                <EditText
+                                    android:id="@+id/address2_input"
+                                    android:layout_width="60dp"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="right|center_vertical"
+                                    android:singleLine="true"
+                                    android:inputType="number"
+                                    android:maxLength="3"/>
+
+                                <Button
+                                    android:id="@+id/address2_decrement"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/digits_decrement"/>
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/address_dot"/>
+
+                        <LinearLayout
+                                android:orientation="vertical"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content">
+
+                                <Button android:id="@+id/address3_increment"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/digits_increment"/>
+
+                                <EditText
+                                    android:id="@+id/address3_input"
+                                    android:layout_width="60dp"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="right|center_vertical"
+                                    android:singleLine="true"
+                                    android:inputType="number"
+                                    android:maxLength="3"
+                                    android:digits="0123456789"/>
+
+                                <Button
+                                    android:id="@+id/address3_decrement"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/digits_decrement"/>
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/address_dot"/>
+
+                        <LinearLayout
+                                android:orientation="vertical"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content">
+
+                                <Button android:id="@+id/address4_increment"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/digits_increment"/>
+
+                                <EditText
+                                    android:id="@+id/address4_input"
+                                    android:layout_width="60dp"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="right|center_vertical"
+                                    android:singleLine="true"
+                                    android:inputType="number"
+                                    android:maxLength="3"/>
+
+                                <Button
+                                    android:id="@+id/address4_decrement"
+                                    android:layout_width="fill_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/digits_decrement"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <Button
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/network_discovery"
+                        android:id="@+id/button"
+                        android:onClick="openNetworkDiscovery"
+                        android:layout_marginTop="15dp" />
+
+                </LinearLayout>
 
                 <!-- address2 -->
-                <LinearLayout
-                        android:orientation="vertical"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
-
-                        <Button android:id="@+id/address2_increment"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/digits_increment"/>
-
-                        <EditText
-                            android:id="@+id/address2_input"
-                            android:layout_width="60dp"
-                            android:layout_height="wrap_content"
-                            android:gravity="right|center_vertical"
-                            android:singleLine="true"
-                            android:inputType="number"
-                            android:maxLength="3"/>
-
-                        <Button
-                            android:id="@+id/address2_decrement"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/digits_decrement"/>
-                </LinearLayout>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/address_dot"/>
 
                 <!-- address3 -->
-                <LinearLayout
-                        android:orientation="vertical"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
-
-                        <Button android:id="@+id/address3_increment"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/digits_increment"/>
-
-                        <EditText
-                            android:id="@+id/address3_input"
-                            android:layout_width="60dp"
-                            android:layout_height="wrap_content"
-                            android:gravity="right|center_vertical"
-                            android:singleLine="true"
-                            android:inputType="number"
-                            android:maxLength="3"
-                            android:digits="0123456789"/>
-
-                        <Button
-                            android:id="@+id/address3_decrement"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/digits_decrement"/>
-                </LinearLayout>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/address_dot"/>
 
                 <!-- address4 -->
-                <LinearLayout
-                        android:orientation="vertical"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
-
-                        <Button android:id="@+id/address4_increment"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/digits_increment"/>
-
-                        <EditText
-                            android:id="@+id/address4_input"
-                            android:layout_width="60dp"
-                            android:layout_height="wrap_content"
-                            android:gravity="right|center_vertical"
-                            android:singleLine="true"
-                            android:inputType="number"
-                            android:maxLength="3"/>
-
-                        <Button
-                            android:id="@+id/address4_decrement"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/digits_decrement"/>
-                </LinearLayout>
 
 
             </LinearLayout>

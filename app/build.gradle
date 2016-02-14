@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.camera.simplemjpeg"
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 22
     }
 

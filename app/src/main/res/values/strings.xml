@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="app_name">BWARG (Master)</string>
+    <string name="app_name">BWARG (Master)</string>
 
-	<string name="settings">Settings</string>
+    <string name="settings">Settings</string>
 
-	<string name="resolution_label">Resolution</string>
-	<string name="resolution_times"> x </string>
-	<string name="camera">Camera</string>
-	<string name="left">Left</string>
-	<string name="right">Right</string>
-	<string name="general">General</string>
-	<string-array name="resolution_array">
+    <string name="resolution_label">Resolution</string>
+    <string name="resolution_times"> x </string>
+    <string name="camera">Camera</string>
+    <string name="left">Left</string>
+    <string name="right">Right</string>
+    <string name="general">General</string>
+    <string-array name="resolution_array">
         <item>640x480</item>
         <item>480x640</item>
         <item>320x240</item>
@@ -20,36 +20,38 @@
         <item>Custom</item>
     </string-array>
 
-	<string name="ip_setting_label">Address</string>
-	<string name="port_setting_label">Port</string>
-	<string name="command_setting_label">Command</string>
+    <string name="ip_setting_label">Address</string>
+    <string name="port_setting_label">Port</string>
+    <string name="command_setting_label">Command</string>
     <string name="connected_to">Connected to </string>
-	<string name="digits_increment">+</string>
-	<string name="digits_decrement">-</string>
-	<string name="address_dot">.</string>
-	<string name="port_80">80</string>
-	<string name="port_8080">8080</string>
-	<string name="port_80_with_explanation">80 (for Ai-ball)</string>
-	<string name="port_8080_with_explanation">8080 (for IP Webcam)</string>
-	<string name="command_streaming">\?action=stream</string>
-	<string name="command_videofeed">videofeed</string>
-	<string name="command_streaming_with_explanation">\?action=stream (for Ai-ball)</string>
-	<string name="command_videofeed_with_explanation">videofeed (for IP Webcam)</string>
+    <string name="digits_increment">+</string>
+    <string name="digits_decrement">-</string>
+    <string name="address_dot">.</string>
+    <string name="port_80">80</string>
+    <string name="port_8080">8080</string>
+    <string name="port_80_with_explanation">80 (for Ai-ball)</string>
+    <string name="port_8080_with_explanation">8080 (for IP Webcam)</string>
+    <string name="command_streaming">\?action=stream</string>
+    <string name="command_videofeed">videofeed</string>
+    <string name="command_streaming_with_explanation">\?action=stream (for Ai-ball)</string>
+    <string name="command_videofeed_with_explanation">videofeed (for IP Webcam)</string>
 
-	<string name="settings_done">Done</string>
+    <string name="settings_done">Done</string>
 
-	<string name="title_disconnected">Disconnected</string>
-	<string name="title_connecting">Connecting&#8230;</string>
-	<string name="title_imageerror">Error on preparing images</string>
+    <string name="title_disconnected">Disconnected</string>
+    <string name="title_connecting">Connecting&#8230;</string>
+    <string name="title_imageerror">Error on preparing images</string>
     <string name="title_activity_general_settings">GeneralSettingsActivity</string>
 
     <string name="title_settings_left">Left Stream</string>
     <string name="title_settings_right">Right Stream</string>
     <string name="title_settings_general">General Settings</string>
+    <string name="title_settings_discover_udp">LAN Discover</string>
     <string name="stream_settings_label">Open stream settings</string>
     <string name="compression_method_label">Compression Method (soon)</string>
     <string name="jpeg_label">JPEG (bigger files, faster enc/dec)</string>
     <string name="bgp_label">BGP (smaller files, slower enc/dec)</string>
+    <string name="network_discovery">Network Scan</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"
 
