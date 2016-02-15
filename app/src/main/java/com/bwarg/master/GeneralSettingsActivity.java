@@ -3,10 +3,15 @@ package com.bwarg.master;
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Layout;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
 
 public class GeneralSettingsActivity extends ActionBarActivity {
     StreamPreferences streamPrefLeft = new StreamPreferences();
@@ -17,6 +22,7 @@ public class GeneralSettingsActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle(getResources().getString(R.string.title_settings_general));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_general_settings);
         Bundle extras = getIntent().getExtras();
 
@@ -39,6 +45,27 @@ public class GeneralSettingsActivity extends ActionBarActivity {
                     }
                 }
         );
+        CheckBox checkBoxFPS = (CheckBox) findViewById(R.id.checkBox_fps);
+        checkBoxFPS.setChecked(MjpegActivity.SHOW_FPS);
+
+        CheckBox checkBoxStatus = (CheckBox) findViewById(R.id.checkBox_log);
+        checkBoxStatus.setChecked(MjpegActivity.SHOW_CAMERA_STATUS);
+    }
+    public void onCheckboxClicked(View view) {
+        // Is the view now checked?
+        boolean checked = ((CheckBox) view).isChecked();
+
+        // Check which checkbox was clicked
+        switch(view.getId()) {
+            case R.id.checkBox_fps:
+                MjpegActivity.SHOW_FPS=checked;
+                break;
+            case R.id.checkBox_log:
+                MjpegActivity.SHOW_CAMERA_STATUS = checked;
+                break;
+            default:
+                break;
+        }
     }
     private void loadExtras(Bundle extras, StreamPreferences prefs, int camNum) {
         prefs.setWidth(extras.getInt("width" + camNum, prefs.getWidth()));
@@ -49,6 +76,8 @@ public class GeneralSettingsActivity extends ActionBarActivity {
         prefs.setIp_ad3(extras.getInt("ip_ad3" + camNum, prefs.getIp_ad3()));
         prefs.setIp_ad4(extras.getInt("ip_ad4" + camNum, prefs.getIp_ad4()));
         prefs.setIp_port(extras.getInt("ip_port" + camNum, prefs.getIp_port()));
+        prefs.setName(extras.getString("device_name" + camNum));
+        prefs.setCommand(extras.getString("ip_command" + camNum));
     }
     private void putExtras(Intent intent, StreamPreferences prefs, int camNum){
         intent.putExtra("width" + camNum, prefs.getWidth());
@@ -58,6 +87,8 @@ public class GeneralSettingsActivity extends ActionBarActivity {
         intent.putExtra("ip_ad3" + camNum, prefs.getIp_ad3());
         intent.putExtra("ip_ad4" + camNum, prefs.getIp_ad4());
         intent.putExtra("ip_port" + camNum, prefs.getIp_port());
+        intent.putExtra("device_name" + camNum, prefs.getName());
+        intent.putExtra("ip_command"+camNum, prefs.getCommand());
     }
     public void openSettingsLeft(View v){
         Intent intent = new Intent(this, CamSettingsActivity.class);
@@ -69,7 +100,9 @@ public class GeneralSettingsActivity extends ActionBarActivity {
         settings_intent.putExtra("ip_ad3", streamPrefLeft.getIp_ad3());
         settings_intent.putExtra("ip_ad4", streamPrefLeft.getIp_ad4());
         settings_intent.putExtra("ip_port", streamPrefLeft.getIp_port());
+        settings_intent.putExtra("device_name", streamPrefLeft.getName());
         settings_intent.putExtra("cam_number", 1);
+        settings_intent.putExtra("ip_command", streamPrefLeft.getCommand());
         startActivityForResult(settings_intent, REQUEST_SETTINGS);
 
     }
@@ -83,7 +116,10 @@ public class GeneralSettingsActivity extends ActionBarActivity {
         settings_intent.putExtra("ip_ad3", streamPrefRight.getIp_ad3());
         settings_intent.putExtra("ip_ad4", streamPrefRight.getIp_ad4());
         settings_intent.putExtra("ip_port", streamPrefRight.getIp_port());
-        Log.d("MJPEG_Cam" + 2, "sent to settings : ip_port=" + streamPrefRight.getIp_port());
+        settings_intent.putExtra("device_name", streamPrefRight.getName());
+        settings_intent.putExtra("ip_command", streamPrefRight.getCommand());
+
+        Log.d("MJPEG_Cam" + 2, "sent to settings : ip_command=" + streamPrefRight.getCommand());
         settings_intent.putExtra("cam_number", 2);
         startActivityForResult(settings_intent, REQUEST_SETTINGS);
 
@@ -101,6 +137,8 @@ public class GeneralSettingsActivity extends ActionBarActivity {
                         streamPrefLeft.setIp_ad3(data.getIntExtra("ip_ad3", streamPrefLeft.getIp_ad3()));
                         streamPrefLeft.setIp_ad4(data.getIntExtra("ip_ad4", streamPrefLeft.getIp_ad4()));
                         streamPrefLeft.setIp_port(data.getIntExtra("ip_port", streamPrefLeft.getIp_port()));
+                        streamPrefLeft.setName(data.getStringExtra("device_name"));
+                        streamPrefLeft.setCommand(data.getStringExtra("ip_command"));
                     }else if (cam_number == 2){ //right_cam
                         streamPrefRight.setWidth(data.getIntExtra("width", streamPrefRight.getWidth()));
                         streamPrefRight.setHeight(data.getIntExtra("height", streamPrefRight.getHeight()));
@@ -109,9 +147,22 @@ public class GeneralSettingsActivity extends ActionBarActivity {
                         streamPrefRight.setIp_ad3(data.getIntExtra("ip_ad3", streamPrefRight.getIp_ad3()));
                         streamPrefRight.setIp_ad4(data.getIntExtra("ip_ad4", streamPrefRight.getIp_ad4()));
                         streamPrefRight.setIp_port(data.getIntExtra("ip_port", streamPrefRight.getIp_port()));
+                        streamPrefRight.setName(data.getStringExtra("device_name"));
+                        streamPrefRight.setCommand(data.getStringExtra("ip_command"));
+
                     }
                 }
                 break;
         }
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

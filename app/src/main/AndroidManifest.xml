@@ -35,12 +35,17 @@
             android:name=".CamSettingsActivity"
             android:label="@string/settings"
             android:screenOrientation="portrait"
+            android:parentActivityName=".GeneralSettingsActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
             android:name=".GeneralSettingsActivity"
             android:label="@string/title_activity_general_settings"
+            android:parentActivityName=".MjpegActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".DiscoverUDPActivity"></activity>
+        <activity android:name=".DiscoverUDPActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".CamSettingsActivity">
+        </activity>
     </application>
 
 </manifest>

@@ -10,6 +10,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -17,7 +18,7 @@ import java.io.IOException;
 
 public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
 
-    public static final String TAG = "MJPEG";
+    public static final String TAG = "MJPEGView";
 
     public final static int POSITION_UPPER_LEFT = 9;
     public final static int POSITION_UPPER_RIGHT = 3;
@@ -112,7 +113,6 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
             c.drawText(fps, -b.left, b.bottom - b.top - p.descent(), p);
             return bm;
         }
-
         public void run() {
             start = System.currentTimeMillis();
             PorterDuffXfermode mode = new PorterDuffXfermode(PorterDuff.Mode.DST_OVER);
@@ -140,6 +140,7 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
                         bmp = mIn.readMjpegFrame();
                         if(bmp == null){
                             ((MjpegActivity) saved_context).setImageError(camNum);
+                            Log.d(TAG, "Received null frame");
                             return;
                         }
 

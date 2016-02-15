@@ -7,10 +7,12 @@ import android.util.Log;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.Properties;
 
 /*
@@ -37,7 +39,7 @@ public class MjpegInputStream extends DataInputStream {
     int skip = 1;
     int count = 0;
 
-    private static final String TAG = "MJPEG";
+    private static final String TAG = "InputStream";
     private static final boolean DEBUG = false;
 
     static {
@@ -86,7 +88,8 @@ public class MjpegInputStream extends DataInputStream {
 
     private int getStartOfSequence(DataInputStream in, byte[] sequence)
             throws IOException {
-        int end = getEndOfSeqeunce(in, sequence);
+        int end = 9;
+        end = getEndOfSeqeunce(in, sequence);
         return (end < 0) ? (-1) : (end - sequence.length);
     }
 
@@ -122,14 +125,14 @@ public class MjpegInputStream extends DataInputStream {
         props.load(headerIn);
         return Integer.parseInt(props.getProperty(CONTENT_LENGTH));
     }
-
     public Bitmap readMjpegFrame() throws IOException {
         mark(FRAME_MAX_LENGTH);
         int headerLen;
         try {
             headerLen = getStartOfSequence(this, SOI_MARKER);
         } catch (IOException e) {
-            if (DEBUG) Log.d(TAG, "IOException in betting headerLen.");
+            e.printStackTrace();
+            Log.d(TAG, "IOException in betting headerLen.");
             reset();
             return null;
         }
@@ -154,6 +157,7 @@ public class MjpegInputStream extends DataInputStream {
                 ContentLengthNew = getEndOfSeqeunce(this, EOF_MARKER);
             }
         } catch (IllegalArgumentException e) {
+            e.printStackTrace();
             if (DEBUG) Log.d(TAG, "IllegalArgumentException in parseContentLength");
             ContentLengthNew = getEndOfSeqeunceSimplified(this, EOF_MARKER);
 
@@ -163,6 +167,7 @@ public class MjpegInputStream extends DataInputStream {
                 ContentLengthNew = getEndOfSeqeunce(this, EOF_MARKER);
             }
         } catch (IOException e) {
+            e.printStackTrace();
             if (DEBUG) Log.d(TAG, "IOException in parseContentLength");
             reset();
             return null;
@@ -184,7 +189,9 @@ public class MjpegInputStream extends DataInputStream {
         readFully(frameData, 0, mContentLength);
 
         if (count++ % skip == 0) {
-            return BitmapFactory.decodeStream(new ByteArrayInputStream(frameData, 0, mContentLength));
+            Bitmap temp =  BitmapFactory.decodeStream(new ByteArrayInputStream(frameData, 0, mContentLength));
+            Log.d(TAG, "Returning bmp after decoding : "+temp);
+            return temp;
         } else {
             return null;
         }

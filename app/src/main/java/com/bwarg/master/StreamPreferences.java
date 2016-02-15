@@ -13,6 +13,8 @@ public class StreamPreferences {
     private int ip_ad4 = 1;
     private int ip_port = 80;
     private String URL = "";
+    private String name = "(Unknown)";
+    private String command ="";
 
     public StreamPreferences(){
 
@@ -126,5 +128,21 @@ public class StreamPreferences {
 
     public void setURL(String URL) {
         this.URL = URL;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCommand() {
+        return command;
+    }
+
+    public void setCommand(String command) {
+        this.command = command;
     }
 }

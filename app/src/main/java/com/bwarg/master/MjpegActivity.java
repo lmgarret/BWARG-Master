@@ -13,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.apache.http.HttpResponse;
@@ -32,6 +33,8 @@ public class MjpegActivity extends ActionBarActivity {
     private MjpegView mvLeft = null;
     private MjpegView mvRight = null;
 
+    private LinearLayout statusLayout = null;
+
     private TextView tvLeft = null;
     private TextView tvRight = null;
 
@@ -39,6 +42,9 @@ public class MjpegActivity extends ActionBarActivity {
     private static final int REQUEST_SETTINGS = 0;
 
     private boolean suspending = false;
+    public static boolean SHOW_FPS = true;
+    //upper right log on view
+    public static boolean SHOW_CAMERA_STATUS = true;
 
     final Handler handler = new Handler();
     private StreamPreferences streamPrefLeft = new StreamPreferences();
@@ -53,6 +59,8 @@ public class MjpegActivity extends ActionBarActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         SharedPreferences sharedPrefs = getSharedPreferences("SAVED_VALUES", MODE_PRIVATE);
+        SHOW_FPS = sharedPrefs.getBoolean("show_fps", true);
+        SHOW_CAMERA_STATUS = sharedPrefs.getBoolean("show_status", true);
 
         streamPrefLeft = loadPreferences(sharedPrefs, 1);
         streamPrefRight = loadPreferences(sharedPrefs, 2);
@@ -76,8 +84,19 @@ public class MjpegActivity extends ActionBarActivity {
         setTv(2, getResources().getString(R.string.title_connecting));
         //new DoReadLeft().execute(streamPrefLeft.getURL());
         //new DoReadRight().execute(streamPrefRight.getURL());
-        new DoReadLeft().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, streamPrefLeft.getURL());
-        new DoReadRight().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, streamPrefRight.getURL());
+        mvLeft.showFps(SHOW_FPS);
+        mvRight.showFps(SHOW_FPS);
+
+        statusLayout = (LinearLayout) findViewById(R.id.camera_status_layout);
+        if (SHOW_CAMERA_STATUS) {
+            statusLayout.setVisibility(View.VISIBLE);
+        }
+        else {
+            statusLayout.setVisibility(View.INVISIBLE);
+        }
+
+        new DoReadLeft().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, streamPrefLeft.getURL()+streamPrefLeft.getCommand());
+        new DoReadRight().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, streamPrefRight.getURL()+streamPrefRight.getCommand());
 
     }
 
@@ -85,15 +104,16 @@ public class MjpegActivity extends ActionBarActivity {
     public void onResume() {
         if (DEBUG) Log.d(TAG, "onResume()");
         super.onResume();
+
         if (mvLeft != null) {
             if (suspending) {
-                new DoReadLeft().execute(streamPrefLeft.getURL());
+                new DoReadLeft().execute(streamPrefLeft.getURL()+streamPrefLeft.getCommand());
                 suspending = false;
             }
         }
         if (mvRight != null) {
             if (suspending) {
-                new DoReadRight().execute(streamPrefRight.getURL());
+                new DoReadRight().execute(streamPrefRight.getURL()+streamPrefRight.getCommand());
                 suspending = false;
             }
         }
@@ -130,12 +150,12 @@ public class MjpegActivity extends ActionBarActivity {
     public void onDestroy() {
         if (DEBUG) Log.d(TAG, "onDestroy()");
 
-        if (mvLeft != null) {
+        /*if (mvLeft != null) {
             mvLeft.freeCameraMemory();
         }
         if (mvRight != null) {
             mvRight.freeCameraMemory();
-        }
+        }*/
 
         super.onDestroy();
     }
@@ -164,7 +184,17 @@ public class MjpegActivity extends ActionBarActivity {
         }*/
         return false;
     }
+    public void restartApp(View v){
+        SharedPreferences preferences = getSharedPreferences("SAVED_VALUES", MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        savePreferences(editor, streamPrefLeft, 1);
+        savePreferences(editor, streamPrefRight, 2);
+        editor.putBoolean("show_fps", SHOW_FPS);
+        editor.putBoolean("show_status", SHOW_CAMERA_STATUS);
+        editor.commit();
 
+        new RestartApp().execute();
+    }
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case REQUEST_SETTINGS:
@@ -177,6 +207,8 @@ public class MjpegActivity extends ActionBarActivity {
                     streamPrefLeft.setIp_ad3(data.getIntExtra("ip_ad31", streamPrefLeft.getIp_ad3()));
                     streamPrefLeft.setIp_ad4(data.getIntExtra("ip_ad41", streamPrefLeft.getIp_ad4()));
                     streamPrefLeft.setIp_port(data.getIntExtra("ip_port1", streamPrefLeft.getIp_port()));
+                    streamPrefLeft.setName(data.getStringExtra("device_name1"));
+                    streamPrefLeft.setCommand(data.getStringExtra("ip_command1"));
 
                     if (mvLeft != null) {
                         mvLeft.setResolution(streamPrefLeft.getWidth(), streamPrefLeft.getHeight());
@@ -189,18 +221,15 @@ public class MjpegActivity extends ActionBarActivity {
                     streamPrefRight.setIp_ad3(data.getIntExtra("ip_ad32", streamPrefRight.getIp_ad3()));
                     streamPrefRight.setIp_ad4(data.getIntExtra("ip_ad42", streamPrefRight.getIp_ad4()));
                     streamPrefRight.setIp_port(data.getIntExtra("ip_port2", streamPrefRight.getIp_port()));
+                    streamPrefRight.setName(data.getStringExtra("device_name2"));
+                    streamPrefRight.setCommand(data.getStringExtra("ip_command2"));
+
 
                     if (mvRight != null) {
                         mvRight.setResolution(streamPrefRight.getWidth(), streamPrefRight.getHeight());
                     }
 
-                    SharedPreferences preferences = getSharedPreferences("SAVED_VALUES", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = preferences.edit();
-                    savePreferences(editor, streamPrefLeft, 1);
-                    savePreferences(editor, streamPrefRight, 2);
-                    editor.commit();
-
-                    new RestartApp().execute();
+                    restartApp(null);
                 }
                 break;
         }
@@ -263,14 +292,14 @@ public class MjpegActivity extends ActionBarActivity {
             if (result != null) {
                 result.setSkip(1);
                 //setTitle(R.string.app_name);
-                setTv(1, getResources().getString(R.string.connected_to)+" "+streamPrefLeft.getURL());
+                setTv(1, getResources().getString(R.string.connected_to)+" ["+streamPrefLeft.getName()+"] @"+streamPrefLeft.getURL()+streamPrefLeft.getCommand());
             } else {
                 //setTitle(R.string.title_disconnected);
                 setTv(1, getResources().getString(R.string.title_disconnected));
 
             }
             mvLeft.setDisplayMode(MjpegView.SIZE_BEST_FIT);
-            mvLeft.showFps(false);
+            mvLeft.showFps(SHOW_FPS);
         }
     }
     public class DoReadRight extends AsyncTask<String, Void, MjpegInputStream> {
@@ -311,15 +340,13 @@ public class MjpegActivity extends ActionBarActivity {
             mvRight.setSource(result);
             if (result != null) {
                 result.setSkip(1);
-                //setTitle(R.string.app_name);
-                setTv(2, getResources().getString(R.string.connected_to)+" "+streamPrefLeft.getURL());
+                setTv(2, getResources().getString(R.string.connected_to)+" ["+streamPrefRight.getName()+"] @"+streamPrefRight.getURL()+streamPrefRight.getCommand());
             } else {
-                //setTitle(R.string.title_disconnected);
                 setTv(2, getResources().getString(R.string.title_disconnected));
 
             }
             mvRight.setDisplayMode(MjpegView.SIZE_BEST_FIT);
-            mvRight.showFps(false);
+            mvRight.showFps(SHOW_FPS);
         }
     }
 
@@ -335,11 +362,11 @@ public class MjpegActivity extends ActionBarActivity {
     }
     private StreamPreferences loadPreferences(SharedPreferences prefs, int num){
         int[] ip = {prefs.getInt("ip_ad1"+num, 192),prefs.getInt("ip_ad2"+num, 168),prefs.getInt("ip_ad3"+num, 2),prefs.getInt("ip_ad4"+num, 1), prefs.getInt("ip_port"+num, 8080)};
-        for (int i = 0; i< ip.length; i++){
-            Log.d("MJPEG_Cam"+num, "arg"+i+" : "+ip[i]);
-        }
+
         StreamPreferences temp = new StreamPreferences(ip,prefs.getInt("width"+num, 640),prefs.getInt("height"+ num, 480));
-        Log.d("MJPEG_Cam" + num, "URL " + temp.getURL() + " loaded at startup.");
+        temp.setName(prefs.getString("device_name"+num, "(Unknown)"));
+        temp.setCommand(prefs.getString("ip_command"+num, ""));
+        Log.d("MJPEG_Cam" + num, "URL " + temp.getURL()+temp.getCommand() + " loaded at startup.");
         return temp;
     }
     private void savePreferences(SharedPreferences.Editor editor, StreamPreferences streamPrefs, int num){
@@ -350,6 +377,8 @@ public class MjpegActivity extends ActionBarActivity {
         editor.putInt("ip_ad3"+num, streamPrefs.getIp_ad3());
         editor.putInt("ip_ad4"+num, streamPrefs.getIp_ad4());
         editor.putInt("ip_port" + num, streamPrefs.getIp_port());
+        editor.putString("device_name" + num, streamPrefs.getName());
+        editor.putString("ip_command"+num, streamPrefs.getCommand());
     }
     public void openSettings(View v){
         Intent intent = new Intent(this, CamSettingsActivity.class);
@@ -361,6 +390,9 @@ public class MjpegActivity extends ActionBarActivity {
         settings_intent.putExtra("ip_ad31", streamPrefLeft.getIp_ad3());
         settings_intent.putExtra("ip_ad41", streamPrefLeft.getIp_ad4());
         settings_intent.putExtra("ip_port1", streamPrefLeft.getIp_port());
+        settings_intent.putExtra("device_name1", streamPrefLeft.getName());
+        settings_intent.putExtra("ip_command1", streamPrefLeft.getCommand());
+
 
 
         settings_intent.putExtra("width2", streamPrefRight.getWidth());
@@ -370,6 +402,9 @@ public class MjpegActivity extends ActionBarActivity {
         settings_intent.putExtra("ip_ad32", streamPrefRight.getIp_ad3());
         settings_intent.putExtra("ip_ad42", streamPrefRight.getIp_ad4());
         settings_intent.putExtra("ip_port2", streamPrefRight.getIp_port());
+        settings_intent.putExtra("device_name2", streamPrefRight.getName());
+        settings_intent.putExtra("ip_command2", streamPrefRight.getCommand());
+
         //Log.d("MJPEG_Cam"+2, "sent to cam_settings : ip_port="+streamPrefRight.getIp_port());
 
         startActivityForResult(settings_intent, REQUEST_SETTINGS);

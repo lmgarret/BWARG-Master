@@ -38,3 +38,9 @@ Thumbs.db
 #App build/
 .app/build/
 
+*.lock
+.gradle/2.2.1/taskArtifacts/fileHashes.bin
+*.bin
+build/intermediates/dex-cache/cache.xml
+*.apk
+build/intermediates/dex-cache/cache.xml

@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -28,6 +30,7 @@ public class CamSettingsActivity extends ActionBarActivity {
     EditText address3_input;
     EditText address4_input;
     EditText port_input;
+    EditText command_input;
 
     Button address1_increment;
     Button address2_increment;
@@ -40,6 +43,7 @@ public class CamSettingsActivity extends ActionBarActivity {
     Button address4_decrement;
 
     RadioGroup port_group;
+    RadioGroup command_group;
 
     int width = 640;
     int height = 480;
@@ -50,6 +54,8 @@ public class CamSettingsActivity extends ActionBarActivity {
     int ip_ad4 = 1;
     int ip_port = 8080;
     int cam_number = 1;
+    String device_name = "(Unknown)";
+    String ip_command = "videofeed";
     public final static int REQUEST_SETTINGS_UDP = 1;
 
 
@@ -57,6 +63,8 @@ public class CamSettingsActivity extends ActionBarActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle(getResources().getString(R.string.title_settings_general));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         setContentView(R.layout.cam_settings);
 
         Bundle extras = getIntent().getExtras();
@@ -78,7 +86,10 @@ public class CamSettingsActivity extends ActionBarActivity {
         address4_input = (EditText) findViewById(R.id.address4_input);
         port_input = (EditText) findViewById(R.id.port_input);
 
+        command_input = (EditText) findViewById(R.id.command_input);
+
         port_group = (RadioGroup) findViewById(R.id.port_radiogroup);
+        command_group = (RadioGroup) findViewById(R.id.command_radiogroup);
 
         if (extras != null) {
             width = extras.getInt("width", width);
@@ -89,7 +100,9 @@ public class CamSettingsActivity extends ActionBarActivity {
             ip_ad3 = extras.getInt("ip_ad3", ip_ad3);
             ip_ad4 = extras.getInt("ip_ad4", ip_ad4);
             ip_port = extras.getInt("ip_port", ip_port);
+            ip_command = extras.getString("ip_command");
 
+            device_name = extras.getString("device_name", device_name);
             Log.d("MJPEG_Cam"+cam_number, " received URL "+getURL()+ " in CamSettingsActivity.");
             cam_number = extras.getInt("cam_number", cam_number);
 
@@ -102,6 +115,8 @@ public class CamSettingsActivity extends ActionBarActivity {
             address3_input.setText(String.valueOf(ip_ad3));
             address4_input.setText(String.valueOf(ip_ad4));
             port_input.setText(String.valueOf(ip_port));
+            command_input.setText(ip_command);
+
 
             if(cam_number == 1){
                 //title.setText(getResources().getString(R.string.title_settings_left));
@@ -376,7 +391,7 @@ public class CamSettingsActivity extends ActionBarActivity {
                         if (!"".equals(s)) {
                             ip_port = Integer.parseInt(s);
                         }
-
+                        ip_command= command_input.getText().toString();
 
                         Intent intent = new Intent();
                         intent.putExtra("width", width);
@@ -386,14 +401,25 @@ public class CamSettingsActivity extends ActionBarActivity {
                         intent.putExtra("ip_ad3", ip_ad3);
                         intent.putExtra("ip_ad4", ip_ad4);
                         intent.putExtra("ip_port", ip_port);
+                        intent.putExtra("ip_command", ip_command);
                         intent.putExtra("cam_number", cam_number);
+                        intent.putExtra("device_name", device_name);
 
-                        Log.d("MJPEG_CAM"+cam_number, "Sending URL "+getURL()+" back to MjpegActivty");
+                        Log.d("MJPEG_CAM" + cam_number, "Sending URL " + getURL() + ip_command +" back to GeneralSettingsActivity");
                         setResult(RESULT_OK, intent);
                         finish();
                     }
                 }
         );
+        command_group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if(checkedId == R.id.command_streaming){
+                    command_input.setText(getString(R.string.command_streaming));
+                }else if(checkedId == R.id.command_videofeed){
+                    command_input.setText(getString(R.string.command_videofeed));
+                }
+            }
+        });
     }
     private String getURL(){
         StringBuilder sb = new StringBuilder();
@@ -429,6 +455,16 @@ public class CamSettingsActivity extends ActionBarActivity {
                     address4_input.setText(String.valueOf(ip_ad4), BufferType.NORMAL);
                     ip_port = data.getIntExtra("ip_port", ip_port);
                     port_input.setText(String.valueOf(ip_port), BufferType.NORMAL);
+                    device_name = data.getStringExtra("device_name");
+                    command_input.setText(ip_command,BufferType.NORMAL );
+
+                }else if(resultCode == Activity.RESULT_CANCELED){
+                    address1_input.setText(String.valueOf(ip_ad1), BufferType.NORMAL);
+                    address2_input.setText(String.valueOf(ip_ad2), BufferType.NORMAL);
+                    address3_input.setText(String.valueOf(ip_ad3), BufferType.NORMAL);
+                    address4_input.setText(String.valueOf(ip_ad4), BufferType.NORMAL);
+                    port_input.setText(String.valueOf(ip_port), BufferType.NORMAL);
+                    command_input.setText(ip_command,BufferType.NORMAL );
                 }
                 break;
         }
@@ -436,5 +472,15 @@ public class CamSettingsActivity extends ActionBarActivity {
     public void openNetworkDiscovery(View v){
         Intent intent = new Intent(this, DiscoverUDPActivity.class);
         startActivityForResult(intent, REQUEST_SETTINGS_UDP);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

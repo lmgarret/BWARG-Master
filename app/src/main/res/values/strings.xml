@@ -51,6 +51,9 @@
     <string name="compression_method_label">Compression Method (soon)</string>
     <string name="jpeg_label">JPEG (bigger files, faster enc/dec)</string>
     <string name="bgp_label">BGP (smaller files, slower enc/dec)</string>
+    <string name="interface_label">Interface</string>
+    <string name="show_fps_label">Show FPS counter</string>
+    <string name="show_status_label">Show camera status</string>
     <string name="network_discovery">Network Scan</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"

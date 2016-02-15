@@ -4,30 +4,35 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
 
-public class DiscoverUDPActivity extends ActionBarActivity implements CallbackReceiver{
+public class DiscoverUDPActivity extends ActionBarActivity{
     private final static String TAG = "DiscoverUDPActivity";
     private static final int DISCOVER_PORT_DEF = 8888;
 
-    // private BwargClient client;
-    private ArrayAdapter<String> adapter;
-    private ArrayList<String> listItems=new ArrayList<String>();
+    private CustomArrayAdapter cAdapter;
     private ArrayList<ServerProfile> profilesLists = new ArrayList<>();
+
     private ListView mListView;
     public final static int REQUEST_SETTINGS_UDP = 1;
 
-    private String SERVICE_NAME_MASTER = "BWARG Master";
-    private String SERVICE_NAME_SLAVE = "BWARG Slave";
+    private String SERVICE_NAME_MASTER = "Master BWARG";
+    private String SERVICE_NAME = "BWARG";
 
     private String SERVICE_TYPE = "_http._tcp.";
     private NsdManager mNsdManager;
@@ -40,18 +45,14 @@ public class DiscoverUDPActivity extends ActionBarActivity implements CallbackRe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle(getResources().getString(R.string.title_settings_discover_udp));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_discover_udp);
-        //client  = new BwargClient(this);
-       //client.setOnDataReceivedListener(this);
-
         if (mListView == null) {
             mListView = (ListView) findViewById(R.id.udp_list);
         }
 
-        adapter=new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1,
-                listItems);
-        mListView.setAdapter(adapter);
+        cAdapter = new CustomArrayAdapter(this, profilesLists);
+        mListView.setAdapter(cAdapter);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -65,6 +66,7 @@ public class DiscoverUDPActivity extends ActionBarActivity implements CallbackRe
                 intent.putExtra("ip_ad3", profSel.getIP()[2]);
                 intent.putExtra("ip_ad4", profSel.getIP()[3]);
                 intent.putExtra("ip_port", profSel.getIP()[4]);
+                intent.putExtra("device_name", profSel.getDevice_name());
 
                 setResult(RESULT_OK, intent);
                 finish();
@@ -80,14 +82,10 @@ public class DiscoverUDPActivity extends ActionBarActivity implements CallbackRe
     }
 
     @Override
-    public void onReceiveData(BwargClient.ServerProfile servProfile) {
-        adapter.add(servProfile.getDevice_name());
-        //profilesLists.add(servProfile);
-    }
-    @Override
     protected void onPause() {
         if (mNsdManager != null) {
             mNsdManager.stopServiceDiscovery(mDiscoveryListener);
+            cAdapter.clear();
         }
 
         super.onPause();
@@ -107,6 +105,8 @@ public class DiscoverUDPActivity extends ActionBarActivity implements CallbackRe
     protected void onDestroy() {
         if (mNsdManager != null) {
             mNsdManager.stopServiceDiscovery(mDiscoveryListener);
+            mNsdManager = null;
+            cAdapter.clear();
         }
         super.onDestroy();
     }
@@ -158,12 +158,14 @@ public class DiscoverUDPActivity extends ActionBarActivity implements CallbackRe
         public void onStartDiscoveryFailed(String serviceType, int errorCode) {
             Log.e(TAG, "Discovery failed: Error code:" + errorCode);
             mNsdManager.stopServiceDiscovery(this);
+            cAdapter.clear();
         }
 
         @Override
         public void onStopDiscoveryFailed(String serviceType, int errorCode) {
             Log.e(TAG, "Discovery failed: Error code:" + errorCode);
             mNsdManager.stopServiceDiscovery(this);
+            cAdapter.clear();
         }
     };
 
@@ -183,15 +185,17 @@ public class DiscoverUDPActivity extends ActionBarActivity implements CallbackRe
             if (serviceInfo.getServiceName().equals(SERVICE_NAME_MASTER)) {
                 Log.d(TAG, "Same IP.");
                 return;
-            }else if(serviceInfo.getServiceName().equals(SERVICE_NAME_SLAVE) ||serviceInfo.getServiceName().equals(SERVICE_NAME_SLAVE.replace(" ", "\\032"))){
+            }else if(serviceInfo.getServiceName().startsWith(SERVICE_NAME)){
                 //SLAVE found!
                 mService = serviceInfo;
                 int port = mService.getPort();
                 InetAddress host = mService.getHost();
+                String name = serviceInfo.getServiceName().substring(SERVICE_NAME.length()).replace("\\032", " ");
 
                 ServerProfile servProfile = new ServerProfile();
                 servProfile.setIpNoPort(host.toString());
                 servProfile.setPort(port);
+                servProfile.setDevice_name(name);
 
                 // Obtain port and IP
                 hostPort = serviceInfo.getPort();
@@ -260,8 +264,47 @@ public class DiscoverUDPActivity extends ActionBarActivity implements CallbackRe
         }
     }
     public void addServerProfile(ServerProfile servProfile){
-        //adapter.add(servProfile.getDevice_name());
-        adapter.add(servProfile.getStringIP());
-        profilesLists.add(servProfile);
+        final ServerProfile pf = servProfile;
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                cAdapter.add(pf);
+                return;
+            }
+        });
     }
+    public class CustomArrayAdapter extends ArrayAdapter<ServerProfile> {
+        private final Context context;
+        private final ArrayList<ServerProfile> values;
+
+        public CustomArrayAdapter(Context context, ArrayList<ServerProfile> values){
+            super(context, R.layout.rowlayout, values);
+            this.context = context;
+            this.values = values;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View rowView = inflater.inflate(R.layout.rowlayout, parent, false);
+            TextView textView = (TextView) rowView.findViewById(R.id.firstLine);
+            textView.setText(values.get(position).getDevice_name());
+            TextView descriptionView = (TextView) rowView.findViewById(R.id.secondLine);
+            descriptionView.setText(values.get(position).getStringIP());
+
+            return rowView;
+        }
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 }

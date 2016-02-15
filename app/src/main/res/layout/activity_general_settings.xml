@@ -73,7 +73,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/port_setting_label"
+            android:text="@string/interface_label"
             android:layout_margin="10dp" />
 
         <LinearLayout
@@ -85,10 +85,11 @@
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:gravity="center">
+            android:gravity="start"
+            android:layout_marginLeft="20dp">
 
             <!-- address1 -->
 
@@ -102,8 +103,16 @@
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="I'm useless"
-                android:id="@+id/checkBox" />
+                android:text="@string/show_fps_label"
+                android:id="@+id/checkBox_fps"
+                android:onClick="onCheckboxClicked" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/show_status_label"
+                android:id="@+id/checkBox_log"
+                android:onClick="onCheckboxClicked" />
         </LinearLayout>
 
         <Button android:id="@+id/general_settings_done"
