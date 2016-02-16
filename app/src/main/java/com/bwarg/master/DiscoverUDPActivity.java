@@ -18,6 +18,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import java.net.InetAddress;
 import java.util.ArrayList;
 
@@ -61,12 +63,8 @@ public class DiscoverUDPActivity extends ActionBarActivity{
             public void onItemClick(AdapterView<?> adapter, View v, int position, long id) {
                 Intent intent = new Intent();
                 ServerProfile profSel = profilesLists.get((int) id);
-                intent.putExtra("ip_ad1", profSel.getIP()[0]);
-                intent.putExtra("ip_ad2", profSel.getIP()[1]);
-                intent.putExtra("ip_ad3", profSel.getIP()[2]);
-                intent.putExtra("ip_ad4", profSel.getIP()[3]);
-                intent.putExtra("ip_port", profSel.getIP()[4]);
-                intent.putExtra("device_name", profSel.getDevice_name());
+                Gson gson = new Gson();
+                intent.putExtra("stream_prefs", gson.toJson(profSel.toStreamPreferences()));
 
                 setResult(RESULT_OK, intent);
                 finish();
@@ -209,7 +207,7 @@ public class DiscoverUDPActivity extends ActionBarActivity{
     };
 
     public class ServerProfile{
-        private String device_name = "None";
+        private String device_name = "(Unknown)";
         private int[] ipTab = {0, 0, 0, 0, 8080};
 
         protected void setIpNoPort(String ip){
@@ -261,6 +259,16 @@ public class DiscoverUDPActivity extends ActionBarActivity{
                 result+=Integer.toString(ipTab[i])+'.';
             }
             return result.substring(0, result.length()-1)+":"+ipTab[ipTab.length-1  ];
+        }
+        protected StreamPreferences toStreamPreferences(){
+            StreamPreferences temp = new StreamPreferences();
+            temp.setIp_ad1(ipTab[0]);
+            temp.setIp_ad2(ipTab[1]);
+            temp.setIp_ad3(ipTab[2]);
+            temp.setIp_ad4(ipTab[3]);
+            temp.setIp_port(ipTab[4]);
+            temp.setName(device_name);
+            return temp;
         }
     }
     public void addServerProfile(ServerProfile servProfile){

@@ -44,3 +44,5 @@ Thumbs.db
 build/intermediates/dex-cache/cache.xml
 *.apk
 build/intermediates/dex-cache/cache.xml
+*.lock
+*.bin

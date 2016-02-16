@@ -16,6 +16,8 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
@@ -23,8 +25,13 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
 
 public class MjpegActivity extends ActionBarActivity {
     private static final boolean DEBUG = false;
@@ -58,6 +65,8 @@ public class MjpegActivity extends ActionBarActivity {
         getSupportActionBar().hide();
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        Gson gson = new Gson();
+
         SharedPreferences sharedPrefs = getSharedPreferences("SAVED_VALUES", MODE_PRIVATE);
         SHOW_FPS = sharedPrefs.getBoolean("show_fps", true);
         SHOW_CAMERA_STATUS = sharedPrefs.getBoolean("show_status", true);
@@ -82,8 +91,7 @@ public class MjpegActivity extends ActionBarActivity {
         }
         tvRight = (TextView) findViewById(R.id.tvRight);
         setTv(2, getResources().getString(R.string.title_connecting));
-        //new DoReadLeft().execute(streamPrefLeft.getURL());
-        //new DoReadRight().execute(streamPrefRight.getURL());
+
         mvLeft.showFps(SHOW_FPS);
         mvRight.showFps(SHOW_FPS);
 
@@ -95,8 +103,8 @@ public class MjpegActivity extends ActionBarActivity {
             statusLayout.setVisibility(View.INVISIBLE);
         }
 
-        new DoReadLeft().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, streamPrefLeft.getURL()+streamPrefLeft.getCommand());
-        new DoReadRight().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, streamPrefRight.getURL()+streamPrefRight.getCommand());
+        new DoRead(mvLeft, 1, streamPrefLeft).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, streamPrefLeft.getURL()+streamPrefLeft.getCommand());
+        new DoRead(mvRight, 2, streamPrefRight).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, streamPrefRight.getURL()+streamPrefRight.getCommand());
 
     }
 
@@ -107,13 +115,13 @@ public class MjpegActivity extends ActionBarActivity {
 
         if (mvLeft != null) {
             if (suspending) {
-                new DoReadLeft().execute(streamPrefLeft.getURL()+streamPrefLeft.getCommand());
+                new DoRead(mvLeft, 1, streamPrefLeft).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, streamPrefLeft.getURL() + streamPrefLeft.getCommand());
                 suspending = false;
             }
         }
         if (mvRight != null) {
             if (suspending) {
-                new DoReadRight().execute(streamPrefRight.getURL()+streamPrefRight.getCommand());
+                new DoRead(mvRight, 2, streamPrefRight).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, streamPrefRight.getURL() + streamPrefRight.getCommand());
                 suspending = false;
             }
         }
@@ -160,30 +168,6 @@ public class MjpegActivity extends ActionBarActivity {
         super.onDestroy();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        //inflater.inflate(R.layout.option_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        /*switch (item.getItemId()) {
-            case R.id.cam_settings:
-                Intent settings_intent = new Intent(MjpegActivity.this, CamSettingsActivity.class);
-                settings_intent.putExtra("width", width);
-                settings_intent.putExtra("height", height);
-                settings_intent.putExtra("ip_ad1", ip_ad1);
-                settings_intent.putExtra("ip_ad2", ip_ad2);
-                settings_intent.putExtra("ip_ad3", ip_ad3);
-                settings_intent.putExtra("ip_ad4", ip_ad4);
-                settings_intent.putExtra("ip_port", ip_port);
-                startActivityForResult(settings_intent, REQUEST_SETTINGS);
-                return true;
-        }*/
-        return false;
-    }
     public void restartApp(View v){
         SharedPreferences preferences = getSharedPreferences("SAVED_VALUES", MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
@@ -200,29 +184,15 @@ public class MjpegActivity extends ActionBarActivity {
             case REQUEST_SETTINGS:
                 if (resultCode == Activity.RESULT_OK) {
                     //left cam
-                    streamPrefLeft.setWidth(data.getIntExtra("width1", streamPrefLeft.getWidth()));
-                    streamPrefLeft.setHeight(data.getIntExtra("height1", streamPrefLeft.getHeight()));
-                    streamPrefLeft.setIp_ad1(data.getIntExtra("ip_ad11", streamPrefLeft.getIp_ad1()));
-                    streamPrefLeft.setIp_ad2(data.getIntExtra("ip_ad21", streamPrefLeft.getIp_ad2()));
-                    streamPrefLeft.setIp_ad3(data.getIntExtra("ip_ad31", streamPrefLeft.getIp_ad3()));
-                    streamPrefLeft.setIp_ad4(data.getIntExtra("ip_ad41", streamPrefLeft.getIp_ad4()));
-                    streamPrefLeft.setIp_port(data.getIntExtra("ip_port1", streamPrefLeft.getIp_port()));
-                    streamPrefLeft.setName(data.getStringExtra("device_name1"));
-                    streamPrefLeft.setCommand(data.getStringExtra("ip_command1"));
+                    Gson gson = new Gson();
+                    streamPrefLeft = gson.fromJson(data.getStringExtra("stream_prefs1"), StreamPreferences.class);
 
                     if (mvLeft != null) {
                         mvLeft.setResolution(streamPrefLeft.getWidth(), streamPrefLeft.getHeight());
                     }
                     //right_cam
-                    streamPrefRight.setWidth(data.getIntExtra("width2", streamPrefRight.getWidth()));
-                    streamPrefRight.setHeight(data.getIntExtra("height2", streamPrefRight.getHeight()));
-                    streamPrefRight.setIp_ad1(data.getIntExtra("ip_ad12", streamPrefRight.getIp_ad1()));
-                    streamPrefRight.setIp_ad2(data.getIntExtra("ip_ad22", streamPrefRight.getIp_ad2()));
-                    streamPrefRight.setIp_ad3(data.getIntExtra("ip_ad32", streamPrefRight.getIp_ad3()));
-                    streamPrefRight.setIp_ad4(data.getIntExtra("ip_ad42", streamPrefRight.getIp_ad4()));
-                    streamPrefRight.setIp_port(data.getIntExtra("ip_port2", streamPrefRight.getIp_port()));
-                    streamPrefRight.setName(data.getStringExtra("device_name2"));
-                    streamPrefRight.setCommand(data.getStringExtra("ip_command2"));
+                    gson = new Gson();
+                    streamPrefRight = gson.fromJson(data.getStringExtra("stream_prefs2"), StreamPreferences.class);
 
 
                     if (mvRight != null) {
@@ -253,100 +223,38 @@ public class MjpegActivity extends ActionBarActivity {
         });
     }
 
-    public class DoReadLeft extends AsyncTask<String, Void, MjpegInputStream> {
+    public class DoRead extends AsyncTask<String, Void, MjpegInputStream> {
+        protected  MjpegView mView = null;
+        protected int camNum = 1;
+        protected StreamPreferences streamPrefs = null;
+
+        protected  DoRead(MjpegView mView, int camNum, StreamPreferences streamPrefs){
+            this.mView=mView;
+            this.camNum = camNum;
+            this.streamPrefs = streamPrefs;
+        }
         protected MjpegInputStream doInBackground(String... url) {
-            //TODO: if camera has authentication deal with it and don't just not work
-            HttpResponse res = null;
-            DefaultHttpClient httpclient = new DefaultHttpClient();
-            HttpParams httpParams = httpclient.getParams();
-            HttpConnectionParams.setConnectionTimeout(httpParams, 5 * 1000);
-            HttpConnectionParams.setSoTimeout(httpParams, 5 * 1000);
-            if (DEBUG) Log.d(TAG, "1. Sending http request");
+            HttpURLConnection urlConnection = null;
             try {
-                res = httpclient.execute(new HttpGet(URI.create(url[0])));
-                if (DEBUG)
-                    Log.d(TAG, "2. Request finished, status = " + res.getStatusLine().getStatusCode());
-                if (res.getStatusLine().getStatusCode() == 401) {
-                    //You must turn off camera User Access Control before this will work
-                    return null;
-                }
-                return new MjpegInputStream(res.getEntity().getContent());
-            } catch (ClientProtocolException e) {
-                if (DEBUG) {
-                    e.printStackTrace();
-                    Log.d(TAG, "Request failed-ClientProtocolException", e);
-                }
-                //Error connecting to camera
+                urlConnection = (HttpURLConnection)(new URL(url[0])).openConnection();
+                return new MjpegInputStream(urlConnection.getInputStream());
             } catch (IOException e) {
-                if (DEBUG) {
-                    e.printStackTrace();
-                    Log.d(TAG, "Request failed-IOException", e);
-                }
-                //Error connecting to camera
+                e.printStackTrace();
             }
             return null;
         }
 
         protected void onPostExecute(MjpegInputStream result) {
-            mvLeft.setSource(result);
+            mView.setSource(result);
             if (result != null) {
                 result.setSkip(1);
-                //setTitle(R.string.app_name);
-                setTv(1, getResources().getString(R.string.connected_to)+" ["+streamPrefLeft.getName()+"] @"+streamPrefLeft.getURL()+streamPrefLeft.getCommand());
+                setTv(camNum, getResources().getString(R.string.connected_to)+" ["+streamPrefs.getName()+"] @"+streamPrefs.getURL()+streamPrefs.getCommand());
             } else {
-                //setTitle(R.string.title_disconnected);
-                setTv(1, getResources().getString(R.string.title_disconnected));
+                setTv(camNum, getResources().getString(R.string.title_disconnected));
 
             }
-            mvLeft.setDisplayMode(MjpegView.SIZE_BEST_FIT);
-            mvLeft.showFps(SHOW_FPS);
-        }
-    }
-    public class DoReadRight extends AsyncTask<String, Void, MjpegInputStream> {
-        protected MjpegInputStream doInBackground(String... url) {
-            //TODO: if camera has authentication deal with it and don't just not work
-            HttpResponse res = null;
-            DefaultHttpClient httpclient = new DefaultHttpClient();
-            HttpParams httpParams = httpclient.getParams();
-            HttpConnectionParams.setConnectionTimeout(httpParams, 5 * 1000);
-            HttpConnectionParams.setSoTimeout(httpParams, 5 * 1000);
-            if (DEBUG) Log.d(TAG, "1. Sending http request");
-            try {
-                res = httpclient.execute(new HttpGet(URI.create(url[0])));
-                if (DEBUG)
-                    Log.d(TAG, "2. Request finished, status = " + res.getStatusLine().getStatusCode());
-                if (res.getStatusLine().getStatusCode() == 401) {
-                    //You must turn off camera User Access Control before this will work
-                    return null;
-                }
-                return new MjpegInputStream(res.getEntity().getContent());
-            } catch (ClientProtocolException e) {
-                if (DEBUG) {
-                    e.printStackTrace();
-                    Log.d(TAG, "Request failed-ClientProtocolException", e);
-                }
-                //Error connecting to camera
-            } catch (IOException e) {
-                if (DEBUG) {
-                    e.printStackTrace();
-                    Log.d(TAG, "Request failed-IOException", e);
-                }
-                //Error connecting to camera
-            }
-            return null;
-        }
-
-        protected void onPostExecute(MjpegInputStream result) {
-            mvRight.setSource(result);
-            if (result != null) {
-                result.setSkip(1);
-                setTv(2, getResources().getString(R.string.connected_to)+" ["+streamPrefRight.getName()+"] @"+streamPrefRight.getURL()+streamPrefRight.getCommand());
-            } else {
-                setTv(2, getResources().getString(R.string.title_disconnected));
-
-            }
-            mvRight.setDisplayMode(MjpegView.SIZE_BEST_FIT);
-            mvRight.showFps(SHOW_FPS);
+            mView.setDisplayMode(MjpegView.SIZE_BEST_FIT);
+            mView.showFps(SHOW_FPS);
         }
     }
 
@@ -361,51 +269,22 @@ public class MjpegActivity extends ActionBarActivity {
         }
     }
     private StreamPreferences loadPreferences(SharedPreferences prefs, int num){
-        int[] ip = {prefs.getInt("ip_ad1"+num, 192),prefs.getInt("ip_ad2"+num, 168),prefs.getInt("ip_ad3"+num, 2),prefs.getInt("ip_ad4"+num, 1), prefs.getInt("ip_port"+num, 8080)};
+        Gson gson = new Gson();
+        StreamPreferences temp = gson.fromJson(prefs.getString("stream_prefs"+num, StreamPreferences.defaultGsonString()), StreamPreferences.class);
 
-        StreamPreferences temp = new StreamPreferences(ip,prefs.getInt("width"+num, 640),prefs.getInt("height"+ num, 480));
-        temp.setName(prefs.getString("device_name"+num, "(Unknown)"));
-        temp.setCommand(prefs.getString("ip_command"+num, ""));
         Log.d("MJPEG_Cam" + num, "URL " + temp.getURL()+temp.getCommand() + " loaded at startup.");
         return temp;
     }
     private void savePreferences(SharedPreferences.Editor editor, StreamPreferences streamPrefs, int num){
-        editor.putInt("width"+num, streamPrefs.getWidth());
-        editor.putInt("height"+num, streamPrefs.getHeight());
-        editor.putInt("ip_ad1"+num, streamPrefs.getIp_ad1());
-        editor.putInt("ip_ad2"+num, streamPrefs.getIp_ad2());
-        editor.putInt("ip_ad3"+num, streamPrefs.getIp_ad3());
-        editor.putInt("ip_ad4"+num, streamPrefs.getIp_ad4());
-        editor.putInt("ip_port" + num, streamPrefs.getIp_port());
-        editor.putString("device_name" + num, streamPrefs.getName());
-        editor.putString("ip_command"+num, streamPrefs.getCommand());
+        Gson gson = new Gson();
+        editor.putString("stream_prefs"+num, gson.toJson(streamPrefs));
     }
     public void openSettings(View v){
         Intent intent = new Intent(this, CamSettingsActivity.class);
         Intent settings_intent = new Intent(MjpegActivity.this, GeneralSettingsActivity.class);
-        settings_intent.putExtra("width1", streamPrefLeft.getWidth());
-        settings_intent.putExtra("height1", streamPrefLeft.getHeight());
-        settings_intent.putExtra("ip_ad11", streamPrefLeft.getIp_ad1());
-        settings_intent.putExtra("ip_ad21", streamPrefLeft.getIp_ad2());
-        settings_intent.putExtra("ip_ad31", streamPrefLeft.getIp_ad3());
-        settings_intent.putExtra("ip_ad41", streamPrefLeft.getIp_ad4());
-        settings_intent.putExtra("ip_port1", streamPrefLeft.getIp_port());
-        settings_intent.putExtra("device_name1", streamPrefLeft.getName());
-        settings_intent.putExtra("ip_command1", streamPrefLeft.getCommand());
-
-
-
-        settings_intent.putExtra("width2", streamPrefRight.getWidth());
-        settings_intent.putExtra("height2", streamPrefRight.getHeight());
-        settings_intent.putExtra("ip_ad12", streamPrefRight.getIp_ad1());
-        settings_intent.putExtra("ip_ad22", streamPrefRight.getIp_ad2());
-        settings_intent.putExtra("ip_ad32", streamPrefRight.getIp_ad3());
-        settings_intent.putExtra("ip_ad42", streamPrefRight.getIp_ad4());
-        settings_intent.putExtra("ip_port2", streamPrefRight.getIp_port());
-        settings_intent.putExtra("device_name2", streamPrefRight.getName());
-        settings_intent.putExtra("ip_command2", streamPrefRight.getCommand());
-
-        //Log.d("MJPEG_Cam"+2, "sent to cam_settings : ip_port="+streamPrefRight.getIp_port());
+        Gson gson = new Gson();
+        settings_intent.putExtra("stream_prefs1",gson.toJson(streamPrefLeft));
+        settings_intent.putExtra("stream_prefs2",gson.toJson(streamPrefRight));
 
         startActivityForResult(settings_intent, REQUEST_SETTINGS);
 

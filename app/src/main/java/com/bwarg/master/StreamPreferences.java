@@ -1,5 +1,7 @@
 package com.bwarg.master;
 
+import com.google.gson.Gson;
+
 /**
  * Created by LM on 10.02.2016.
  */
@@ -11,7 +13,7 @@ public class StreamPreferences {
     private int ip_ad2 = 168;
     private int ip_ad3 = 2;
     private int ip_ad4 = 1;
-    private int ip_port = 80;
+    private int ip_port = 8080;
     private String URL = "";
     private String name = "(Unknown)";
     private String command ="";
@@ -144,5 +146,10 @@ public class StreamPreferences {
 
     public void setCommand(String command) {
         this.command = command;
+    }
+
+    public static String defaultGsonString(){
+        Gson gson = new Gson();
+        return gson.toJson(new StreamPreferences());
     }
 }

@@ -2,7 +2,6 @@ package com.bwarg.master;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
@@ -16,6 +15,8 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView.BufferType;
+
+import com.google.gson.Gson;
 
 public class CamSettingsActivity extends ActionBarActivity {
 
@@ -45,17 +46,10 @@ public class CamSettingsActivity extends ActionBarActivity {
     RadioGroup port_group;
     RadioGroup command_group;
 
-    int width = 640;
-    int height = 480;
-
-    int ip_ad1 = 192;
-    int ip_ad2 = 168;
-    int ip_ad3 = 2;
-    int ip_ad4 = 1;
-    int ip_port = 8080;
+    StreamPreferences streamPrefs = new StreamPreferences();
+    StreamPreferences origStreamPrefs = new StreamPreferences(); //original stream prefs received when creating activity
     int cam_number = 1;
-    String device_name = "(Unknown)";
-    String ip_command = "videofeed";
+
     public final static int REQUEST_SETTINGS_UDP = 1;
 
 
@@ -92,40 +86,24 @@ public class CamSettingsActivity extends ActionBarActivity {
         command_group = (RadioGroup) findViewById(R.id.command_radiogroup);
 
         if (extras != null) {
-            width = extras.getInt("width", width);
-            height = extras.getInt("height", height);
+            Gson gson = new Gson();
+            streamPrefs = gson.fromJson(extras.getString("stream_prefs"), StreamPreferences.class);
+            origStreamPrefs = streamPrefs;
 
-            ip_ad1 = extras.getInt("ip_ad1", ip_ad1);
-            ip_ad2 = extras.getInt("ip_ad2", ip_ad2);
-            ip_ad3 = extras.getInt("ip_ad3", ip_ad3);
-            ip_ad4 = extras.getInt("ip_ad4", ip_ad4);
-            ip_port = extras.getInt("ip_port", ip_port);
-            ip_command = extras.getString("ip_command");
-
-            device_name = extras.getString("device_name", device_name);
-            Log.d("MJPEG_Cam"+cam_number, " received URL "+getURL()+ " in CamSettingsActivity.");
             cam_number = extras.getInt("cam_number", cam_number);
 
-            width_input.setText(String.valueOf(width));
-            height_input.setText(String.valueOf(height));
+            Log.d("MJPEG_Cam" + cam_number, " received URL " + streamPrefs.getURL()+streamPrefs.getCommand() + " in CamSettingsActivity.");
             resolution_spinner.setSelection(adapter.getCount() - 1);
 
-            address1_input.setText(String.valueOf(ip_ad1));
-            address2_input.setText(String.valueOf(ip_ad2));
-            address3_input.setText(String.valueOf(ip_ad3));
-            address4_input.setText(String.valueOf(ip_ad4));
-            port_input.setText(String.valueOf(ip_port));
-            command_input.setText(ip_command);
-
+            fillUI(streamPrefs);
 
             if(cam_number == 1){
-                //title.setText(getResources().getString(R.string.title_settings_left));
                 setTitle(getResources().getString(R.string.title_settings_left));
             }else if (cam_number == 2){
-                //title.setText(getResources().getString(R.string.title_settings_right));
                 setTitle(getResources().getString(R.string.title_settings_right));
             }
         }else{
+            fillUI(streamPrefs);
             Log.d("MJPEG_Cam"+cam_number, " null args received");
         }
 
@@ -133,27 +111,13 @@ public class CamSettingsActivity extends ActionBarActivity {
             public void onItemSelected(AdapterView<?> parent, View viw, int arg2, long arg3) {
                 Spinner spinner = (Spinner) parent;
                 String item = (String) spinner.getSelectedItem();
-                if (item.equals("640x480")) {
-                    width = 640;
-                    height = 480;
-                } else if (item.equals("480x640")) {
-                    width = 480;
-                    height = 640;
-                } else if (item.equals("320x240")) {
-                    width = 320;
-                    height = 240;
-                } else if (item.equals("240x320")) {
-                    width = 240;
-                    height = 320;
-                } else if (item.equals("176x144")) {
-                    width = 176;
-                    height = 144;
-                } else if (item.equals("144x176")) {
-                    width = 144;
-                    height = 176;
+                if(!item.equals("Custom")){
+                    int xIndex = item.indexOf('x');
+                    streamPrefs.setWidth(Integer.parseInt(item.substring(0, xIndex)));
+                    streamPrefs.setHeight(Integer.parseInt(item.substring(xIndex+1, item.length())));
+                    width_input.setText(String.valueOf(streamPrefs.getWidth()));
+                    height_input.setText(String.valueOf(streamPrefs.getHeight()));
                 }
-                width_input.setText(String.valueOf(width));
-                height_input.setText(String.valueOf(height));
             }
 
             public void onNothingSelected(AdapterView<?> parent) {
@@ -164,22 +128,7 @@ public class CamSettingsActivity extends ActionBarActivity {
         address1_increment.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View view) {
-                        String s = address1_input.getText().toString();
-                        int val = ip_ad1;
-                        if (!"".equals(s)) {
-                            val = Integer.parseInt(s);
-                        }
-                        if (val >= 0 && val < 255) {
-                            val += 1;
-                        } else if (val < 0) {
-                            val = 0;
-                        } else if (val >= 255) {
-                            val = 255;
-                        }
-
-                        ip_ad1 = val;
-                        address1_input.setText(String.valueOf(ip_ad1), BufferType.NORMAL);
-
+                        addToAddress(address1_input, 1, 1);
                     }
                 }
         );
@@ -187,22 +136,7 @@ public class CamSettingsActivity extends ActionBarActivity {
         address2_increment.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View view) {
-                        String s = address2_input.getText().toString();
-                        int val = ip_ad2;
-                        if (!"".equals(s)) {
-                            val = Integer.parseInt(s);
-                        }
-                        if (val >= 0 && val < 255) {
-                            val += 1;
-                        } else if (val < 0) {
-                            val = 0;
-                        } else if (val >= 255) {
-                            val = 255;
-                        }
-
-                        ip_ad2 = val;
-                        address2_input.setText(String.valueOf(ip_ad2), BufferType.NORMAL);
-
+                        addToAddress(address2_input, 2, 1);
                     }
                 }
         );
@@ -210,22 +144,7 @@ public class CamSettingsActivity extends ActionBarActivity {
         address3_increment.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View view) {
-                        String s = address3_input.getText().toString();
-                        int val = ip_ad3;
-                        if (!"".equals(s)) {
-                            val = Integer.parseInt(s);
-                        }
-                        if (val >= 0 && val < 255) {
-                            val += 1;
-                        } else if (val < 0) {
-                            val = 0;
-                        } else if (val >= 255) {
-                            val = 255;
-                        }
-
-                        ip_ad3 = val;
-                        address3_input.setText(String.valueOf(ip_ad3), BufferType.NORMAL);
-
+                        addToAddress(address3_input,3,1);
                     }
                 }
         );
@@ -233,21 +152,7 @@ public class CamSettingsActivity extends ActionBarActivity {
         address4_increment.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View view) {
-                        String s = address4_input.getText().toString();
-                        int val = ip_ad4;
-                        if (!"".equals(s)) {
-                            val = Integer.parseInt(s);
-                        }
-                        if (val >= 0 && val < 255) {
-                            val += 1;
-                        } else if (val < 0) {
-                            val = 0;
-                        } else if (val >= 255) {
-                            val = 255;
-                        }
-
-                        ip_ad4 = val;
-                        address4_input.setText(String.valueOf(ip_ad4), BufferType.NORMAL);
+                        addToAddress(address4_input, 4, 1);
 
                     }
                 }
@@ -257,22 +162,7 @@ public class CamSettingsActivity extends ActionBarActivity {
         address1_decrement.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View view) {
-                        String s = address1_input.getText().toString();
-                        int val = ip_ad1;
-                        if (!"".equals(s)) {
-                            val = Integer.parseInt(s);
-                        }
-                        if (val > 0 && val <= 255) {
-                            val -= 1;
-                        } else if (val <= 0) {
-                            val = 0;
-                        } else if (val > 255) {
-                            val = 255;
-                        }
-
-                        ip_ad1 = val;
-                        address1_input.setText(String.valueOf(ip_ad1), BufferType.NORMAL);
-
+                        addToAddress(address1_input, 1, -1);
                     }
                 }
         );
@@ -281,22 +171,7 @@ public class CamSettingsActivity extends ActionBarActivity {
         address2_decrement.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View view) {
-                        String s = address2_input.getText().toString();
-                        int val = ip_ad2;
-                        if (!"".equals(s)) {
-                            val = Integer.parseInt(s);
-                        }
-                        if (val > 0 && val <= 255) {
-                            val -= 1;
-                        } else if (val <= 0) {
-                            val = 0;
-                        } else if (val > 255) {
-                            val = 255;
-                        }
-
-                        ip_ad2 = val;
-                        address2_input.setText(String.valueOf(ip_ad2), BufferType.NORMAL);
-
+                        addToAddress(address2_input,2,-1);
                     }
                 }
         );
@@ -304,22 +179,7 @@ public class CamSettingsActivity extends ActionBarActivity {
         address3_decrement.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View view) {
-                        String s = address3_input.getText().toString();
-                        int val = ip_ad3;
-                        if (!"".equals(s)) {
-                            val = Integer.parseInt(s);
-                        }
-                        if (val > 0 && val <= 255) {
-                            val -= 1;
-                        } else if (val <= 0) {
-                            val = 0;
-                        } else if (val > 255) {
-                            val = 255;
-                        }
-
-                        ip_ad3 = val;
-                        address3_input.setText(String.valueOf(ip_ad3), BufferType.NORMAL);
-
+                        addToAddress(address3_input, 3, -1);
                     }
                 }
         );
@@ -327,22 +187,7 @@ public class CamSettingsActivity extends ActionBarActivity {
         address4_decrement.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View view) {
-                        String s = address4_input.getText().toString();
-                        int val = ip_ad4;
-                        if (!"".equals(s)) {
-                            val = Integer.parseInt(s);
-                        }
-                        if (val > 0 && val <= 255) {
-                            val -= 1;
-                        } else if (val <= 0) {
-                            val = 0;
-                        } else if (val > 255) {
-                            val = 255;
-                        }
-
-                        ip_ad4 = val;
-                        address4_input.setText(String.valueOf(ip_ad4), BufferType.NORMAL);
-
+                        addToAddress(address4_input, 4, -1);
                     }
                 }
         );
@@ -364,48 +209,41 @@ public class CamSettingsActivity extends ActionBarActivity {
 
                         s = width_input.getText().toString();
                         if (!"".equals(s)) {
-                            width = Integer.parseInt(s);
+                            streamPrefs.setWidth(Integer.parseInt(s));
                         }
                         s = height_input.getText().toString();
                         if (!"".equals(s)) {
-                            height = Integer.parseInt(s);
+                            streamPrefs.setHeight(Integer.parseInt(s));
                         }
                         s = address1_input.getText().toString();
                         if (!"".equals(s)) {
-                            ip_ad1 = Integer.parseInt(s);
+                            streamPrefs.setIp_ad1(Integer.parseInt(s));
                         }
                         s = address2_input.getText().toString();
                         if (!"".equals(s)) {
-                            ip_ad2 = Integer.parseInt(s);
+                            streamPrefs.setIp_ad2(Integer.parseInt(s));
                         }
                         s = address3_input.getText().toString();
                         if (!"".equals(s)) {
-                            ip_ad3 = Integer.parseInt(s);
+                            streamPrefs.setIp_ad3(Integer.parseInt(s));
                         }
                         s = address4_input.getText().toString();
                         if (!"".equals(s)) {
-                            ip_ad4 = Integer.parseInt(s);
+                            streamPrefs.setIp_ad4(Integer.parseInt(s));
                         }
 
                         s = port_input.getText().toString();
                         if (!"".equals(s)) {
-                            ip_port = Integer.parseInt(s);
+                            streamPrefs.setIp_port(Integer.parseInt(s));
                         }
-                        ip_command= command_input.getText().toString();
+                        streamPrefs.setCommand(command_input.getText().toString());
 
                         Intent intent = new Intent();
-                        intent.putExtra("width", width);
-                        intent.putExtra("height", height);
-                        intent.putExtra("ip_ad1", ip_ad1);
-                        intent.putExtra("ip_ad2", ip_ad2);
-                        intent.putExtra("ip_ad3", ip_ad3);
-                        intent.putExtra("ip_ad4", ip_ad4);
-                        intent.putExtra("ip_port", ip_port);
-                        intent.putExtra("ip_command", ip_command);
-                        intent.putExtra("cam_number", cam_number);
-                        intent.putExtra("device_name", device_name);
-
-                        Log.d("MJPEG_CAM" + cam_number, "Sending URL " + getURL() + ip_command +" back to GeneralSettingsActivity");
+                        Gson gson = new Gson();
+                        String stringPref = gson.toJson(streamPrefs);
+                        intent.putExtra("stream_prefs", stringPref);
+                        intent.putExtra("cam_number",cam_number);
+                        Log.d("MJPEG_CAM" + cam_number, "Sending URL " + streamPrefs.getURL() + streamPrefs.getCommand() +" back to GeneralSettingsActivity");
                         setResult(RESULT_OK, intent);
                         finish();
                     }
@@ -421,50 +259,17 @@ public class CamSettingsActivity extends ActionBarActivity {
             }
         });
     }
-    private String getURL(){
-        StringBuilder sb = new StringBuilder();
-        String s_http = "http://";
-        String s_dot = ".";
-        String s_colon = ":";
-        String s_slash = "/";
-        sb.append(s_http);
-        sb.append(ip_ad1);
-        sb.append(s_dot);
-        sb.append(ip_ad2);
-        sb.append(s_dot);
-        sb.append(ip_ad3);
-        sb.append(s_dot);
-        sb.append(ip_ad4);
-        sb.append(s_colon);
-        sb.append(ip_port);
-        sb.append(s_slash);
-        return new String(sb);
-    }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case REQUEST_SETTINGS_UDP:
                 if (resultCode == Activity.RESULT_OK) {
-                    ip_ad1 = data.getIntExtra("ip_ad1", ip_ad1);
-                    address1_input.setText(String.valueOf(ip_ad1), BufferType.NORMAL);
-                    ip_ad2 = data.getIntExtra("ip_ad2", ip_ad2);
-                    address2_input.setText(String.valueOf(ip_ad2), BufferType.NORMAL);
-                    ip_ad3 = data.getIntExtra("ip_ad3", ip_ad3);
-                    address3_input.setText(String.valueOf(ip_ad3), BufferType.NORMAL);
-                    ip_ad4 = data.getIntExtra("ip_ad4", ip_ad4);
-                    address4_input.setText(String.valueOf(ip_ad4), BufferType.NORMAL);
-                    ip_port = data.getIntExtra("ip_port", ip_port);
-                    port_input.setText(String.valueOf(ip_port), BufferType.NORMAL);
-                    device_name = data.getStringExtra("device_name");
-                    command_input.setText(ip_command,BufferType.NORMAL );
+                    Gson gson = new Gson();
+                    streamPrefs = gson.fromJson(data.getStringExtra("stream_prefs"), StreamPreferences.class);
+                    fillUI(streamPrefs);
 
                 }else if(resultCode == Activity.RESULT_CANCELED){
-                    address1_input.setText(String.valueOf(ip_ad1), BufferType.NORMAL);
-                    address2_input.setText(String.valueOf(ip_ad2), BufferType.NORMAL);
-                    address3_input.setText(String.valueOf(ip_ad3), BufferType.NORMAL);
-                    address4_input.setText(String.valueOf(ip_ad4), BufferType.NORMAL);
-                    port_input.setText(String.valueOf(ip_port), BufferType.NORMAL);
-                    command_input.setText(ip_command,BufferType.NORMAL );
+                    fillUI(origStreamPrefs);
                 }
                 break;
         }
@@ -478,9 +283,58 @@ public class CamSettingsActivity extends ActionBarActivity {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
+                fillUI(streamPrefs);
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    //Fills all buttons and texts with the given stream preferences
+    private void fillUI(StreamPreferences streamPrefs){
+        width_input.setText(String.valueOf(streamPrefs.getWidth()), BufferType.NORMAL);
+        height_input.setText(String.valueOf(streamPrefs.getHeight()), BufferType.NORMAL);
+
+        address1_input.setText(String.valueOf(streamPrefs.getIp_ad1()), BufferType.NORMAL);
+        address2_input.setText(String.valueOf(streamPrefs.getIp_ad2()), BufferType.NORMAL);
+        address3_input.setText(String.valueOf(streamPrefs.getIp_ad3()), BufferType.NORMAL);
+        address4_input.setText(String.valueOf(streamPrefs.getIp_ad4()), BufferType.NORMAL);
+        port_input.setText(String.valueOf(streamPrefs.getIp_port()), BufferType.NORMAL);
+
+        command_input.setText(streamPrefs.getCommand(), BufferType.NORMAL);
+    }
+    private void addToAddress(EditText address_input, int address_num, int toAdd){
+        String s = address_input.getText().toString();
+        int val = 0;
+        if(address_num ==1)
+            val = streamPrefs.getIp_ad1();
+        if(address_num==2)
+            val = streamPrefs.getIp_ad2();
+        if(address_num==3)
+            val = streamPrefs.getIp_ad3();
+        if(address_num==4)
+            val = streamPrefs.getIp_ad4();
+
+        if (!"".equals(s)) {
+            val = Integer.parseInt(s);
+        }
+        if (val >= 0 && val <= 255) {
+            val += toAdd;
+        }
+        if (val < 0) {
+            val = 255;
+        } else if (val > 255) {
+            val = 0;
+        }
+
+        if(address_num ==1)
+            streamPrefs.setIp_ad1(val);
+        if(address_num==2)
+            streamPrefs.setIp_ad2(val);
+        if(address_num==3)
+            streamPrefs.setIp_ad3(val);
+        if(address_num==4)
+            streamPrefs.setIp_ad4(val);
+
+        address_input.setText(String.valueOf(val), BufferType.NORMAL);
     }
 }

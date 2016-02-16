@@ -13,6 +13,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 
+import com.google.gson.Gson;
+
 public class GeneralSettingsActivity extends ActionBarActivity {
     StreamPreferences streamPrefLeft = new StreamPreferences();
     StreamPreferences streamPrefRight = new StreamPreferences();
@@ -27,8 +29,8 @@ public class GeneralSettingsActivity extends ActionBarActivity {
         Bundle extras = getIntent().getExtras();
 
         if (extras != null) {
-            loadExtras(extras, streamPrefLeft, 1);
-            loadExtras(extras, streamPrefRight, 2);
+            streamPrefLeft= loadExtras(extras, 1);
+            streamPrefRight = loadExtras(extras, 2);
         }else{
             Log.d("GeneralSettings", " null args received");
         }
@@ -67,60 +69,40 @@ public class GeneralSettingsActivity extends ActionBarActivity {
                 break;
         }
     }
-    private void loadExtras(Bundle extras, StreamPreferences prefs, int camNum) {
-        prefs.setWidth(extras.getInt("width" + camNum, prefs.getWidth()));
-        prefs.setHeight(extras.getInt("height" + camNum, prefs.getHeight()));
-
-        prefs.setIp_ad1(extras.getInt("ip_ad1" + camNum, prefs.getIp_ad1()));
-        prefs.setIp_ad2(extras.getInt("ip_ad2" + camNum, prefs.getIp_ad2()));
-        prefs.setIp_ad3(extras.getInt("ip_ad3" + camNum, prefs.getIp_ad3()));
-        prefs.setIp_ad4(extras.getInt("ip_ad4" + camNum, prefs.getIp_ad4()));
-        prefs.setIp_port(extras.getInt("ip_port" + camNum, prefs.getIp_port()));
-        prefs.setName(extras.getString("device_name" + camNum));
-        prefs.setCommand(extras.getString("ip_command" + camNum));
+    private StreamPreferences loadExtras(Bundle extras, int camNum) {
+        Gson gson = new Gson();
+        return gson.fromJson(extras.getString("stream_prefs"+camNum), StreamPreferences.class);
     }
     private void putExtras(Intent intent, StreamPreferences prefs, int camNum){
-        intent.putExtra("width" + camNum, prefs.getWidth());
-        intent.putExtra("height" + camNum, prefs.getHeight());
-        intent.putExtra("ip_ad1" + camNum, prefs.getIp_ad1());
-        intent.putExtra("ip_ad2" + camNum, prefs.getIp_ad2());
-        intent.putExtra("ip_ad3" + camNum, prefs.getIp_ad3());
-        intent.putExtra("ip_ad4" + camNum, prefs.getIp_ad4());
-        intent.putExtra("ip_port" + camNum, prefs.getIp_port());
-        intent.putExtra("device_name" + camNum, prefs.getName());
-        intent.putExtra("ip_command"+camNum, prefs.getCommand());
+        Gson gson = new Gson();
+        String gsonStreamPrefs = gson.toJson(prefs);
+        intent.putExtra("stream_prefs"+camNum,gsonStreamPrefs);
     }
     public void openSettingsLeft(View v){
         Intent intent = new Intent(this, CamSettingsActivity.class);
         Intent settings_intent = new Intent(GeneralSettingsActivity.this, CamSettingsActivity.class);
-        settings_intent.putExtra("width", streamPrefLeft.getWidth());
-        settings_intent.putExtra("height", streamPrefLeft.getHeight());
-        settings_intent.putExtra("ip_ad1", streamPrefLeft.getIp_ad1());
-        settings_intent.putExtra("ip_ad2", streamPrefLeft.getIp_ad2());
-        settings_intent.putExtra("ip_ad3", streamPrefLeft.getIp_ad3());
-        settings_intent.putExtra("ip_ad4", streamPrefLeft.getIp_ad4());
-        settings_intent.putExtra("ip_port", streamPrefLeft.getIp_port());
-        settings_intent.putExtra("device_name", streamPrefLeft.getName());
+
+        Gson gson = new Gson();
+        String gsonStreamPrefs = gson.toJson(streamPrefLeft);
+        settings_intent.putExtra("stream_prefs", gsonStreamPrefs);
         settings_intent.putExtra("cam_number", 1);
-        settings_intent.putExtra("ip_command", streamPrefLeft.getCommand());
+
+        Log.d("MJPEG_Cam" + 1, "sent to settings : ip_command=" + streamPrefLeft.getCommand());
+
         startActivityForResult(settings_intent, REQUEST_SETTINGS);
 
     }
     public void openSettingsRight(View v){
         Intent intent = new Intent(this, CamSettingsActivity.class);
         Intent settings_intent = new Intent(GeneralSettingsActivity.this, CamSettingsActivity.class);
-        settings_intent.putExtra("width", streamPrefRight.getWidth());
-        settings_intent.putExtra("height", streamPrefRight.getHeight());
-        settings_intent.putExtra("ip_ad1", streamPrefRight.getIp_ad1());
-        settings_intent.putExtra("ip_ad2", streamPrefRight.getIp_ad2());
-        settings_intent.putExtra("ip_ad3", streamPrefRight.getIp_ad3());
-        settings_intent.putExtra("ip_ad4", streamPrefRight.getIp_ad4());
-        settings_intent.putExtra("ip_port", streamPrefRight.getIp_port());
-        settings_intent.putExtra("device_name", streamPrefRight.getName());
-        settings_intent.putExtra("ip_command", streamPrefRight.getCommand());
+
+        Gson gson = new Gson();
+        String gsonStreamPrefs = gson.toJson(streamPrefRight);
+        settings_intent.putExtra("stream_prefs", gsonStreamPrefs);
+        settings_intent.putExtra("cam_number", 2);
 
         Log.d("MJPEG_Cam" + 2, "sent to settings : ip_command=" + streamPrefRight.getCommand());
-        settings_intent.putExtra("cam_number", 2);
+
         startActivityForResult(settings_intent, REQUEST_SETTINGS);
 
     }
@@ -130,26 +112,11 @@ public class GeneralSettingsActivity extends ActionBarActivity {
                 if (resultCode == Activity.RESULT_OK) {
                     int cam_number = data.getIntExtra("cam_number", 1);
                     if(cam_number == 1){ //left cam
-                        streamPrefLeft.setWidth(data.getIntExtra("width", streamPrefLeft.getWidth()));
-                        streamPrefLeft.setHeight(data.getIntExtra("height", streamPrefLeft.getHeight()));
-                        streamPrefLeft.setIp_ad1(data.getIntExtra("ip_ad1", streamPrefLeft.getIp_ad1()));
-                        streamPrefLeft.setIp_ad2(data.getIntExtra("ip_ad2", streamPrefLeft.getIp_ad2()));
-                        streamPrefLeft.setIp_ad3(data.getIntExtra("ip_ad3", streamPrefLeft.getIp_ad3()));
-                        streamPrefLeft.setIp_ad4(data.getIntExtra("ip_ad4", streamPrefLeft.getIp_ad4()));
-                        streamPrefLeft.setIp_port(data.getIntExtra("ip_port", streamPrefLeft.getIp_port()));
-                        streamPrefLeft.setName(data.getStringExtra("device_name"));
-                        streamPrefLeft.setCommand(data.getStringExtra("ip_command"));
+                        Gson gson = new Gson();
+                        streamPrefLeft = gson.fromJson(data.getStringExtra("stream_prefs"), StreamPreferences.class);
                     }else if (cam_number == 2){ //right_cam
-                        streamPrefRight.setWidth(data.getIntExtra("width", streamPrefRight.getWidth()));
-                        streamPrefRight.setHeight(data.getIntExtra("height", streamPrefRight.getHeight()));
-                        streamPrefRight.setIp_ad1(data.getIntExtra("ip_ad1", streamPrefRight.getIp_ad1()));
-                        streamPrefRight.setIp_ad2(data.getIntExtra("ip_ad2", streamPrefRight.getIp_ad2()));
-                        streamPrefRight.setIp_ad3(data.getIntExtra("ip_ad3", streamPrefRight.getIp_ad3()));
-                        streamPrefRight.setIp_ad4(data.getIntExtra("ip_ad4", streamPrefRight.getIp_ad4()));
-                        streamPrefRight.setIp_port(data.getIntExtra("ip_port", streamPrefRight.getIp_port()));
-                        streamPrefRight.setName(data.getStringExtra("device_name"));
-                        streamPrefRight.setCommand(data.getStringExtra("ip_command"));
-
+                        Gson gson = new Gson();
+                        streamPrefRight = gson.fromJson(data.getStringExtra("stream_prefs"), StreamPreferences.class);;
                     }
                 }
                 break;
