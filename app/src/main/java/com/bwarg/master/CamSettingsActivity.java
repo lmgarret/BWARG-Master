@@ -92,16 +92,21 @@ public class CamSettingsActivity extends ActionBarActivity {
 
             cam_number = extras.getInt("cam_number", cam_number);
 
-            Log.d("MJPEG_Cam" + cam_number, " received URL " + streamPrefs.getURL()+streamPrefs.getCommand() + " in CamSettingsActivity.");
+            Log.d("MJPEG_Cam" + cam_number, " received URL " + streamPrefs.getURL() + streamPrefs.getCommand() + " in CamSettingsActivity.");
             resolution_spinner.setSelection(adapter.getCount() - 1);
 
             fillUI(streamPrefs);
 
+            String title = "Stream";
             if(cam_number == 1){
-                setTitle(getResources().getString(R.string.title_settings_left));
+                title = getResources().getString(R.string.title_settings_left);
             }else if (cam_number == 2){
-                setTitle(getResources().getString(R.string.title_settings_right));
+                title = getResources().getString(R.string.title_settings_right);
             }
+            if(!streamPrefs.getName().equals(StreamPreferences.UNKNOWN_NAME)){
+                title+=": "+streamPrefs.getName();
+            }
+            setTitle(title);
         }else{
             fillUI(streamPrefs);
             Log.d("MJPEG_Cam"+cam_number, " null args received");
@@ -275,7 +280,7 @@ public class CamSettingsActivity extends ActionBarActivity {
         }
     }
     public void openNetworkDiscovery(View v){
-        Intent intent = new Intent(this, DiscoverUDPActivity.class);
+        Intent intent = new Intent(this, DiscoverNetworkActivity.class);
         startActivityForResult(intent, REQUEST_SETTINGS_UDP);
     }
     @Override

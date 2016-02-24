@@ -164,6 +164,13 @@ public class MjpegActivity extends ActionBarActivity {
         if (mvRight != null) {
             mvRight.freeCameraMemory();
         }*/
+        SharedPreferences preferences = getSharedPreferences("SAVED_VALUES", MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        savePreferences(editor, streamPrefLeft, 1);
+        savePreferences(editor, streamPrefRight, 2);
+        editor.putBoolean("show_fps", SHOW_FPS);
+        editor.putBoolean("show_status", SHOW_CAMERA_STATUS);
+        editor.commit();
 
         super.onDestroy();
     }

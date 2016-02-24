@@ -6,6 +6,7 @@ import com.google.gson.Gson;
  * Created by LM on 10.02.2016.
  */
 public class StreamPreferences {
+    public final static String UNKNOWN_NAME = "(Unknown)";
     private int width = 640;
     private int height = 480;
 
@@ -15,7 +16,7 @@ public class StreamPreferences {
     private int ip_ad4 = 1;
     private int ip_port = 8080;
     private String URL = "";
-    private String name = "(Unknown)";
+    private String name = UNKNOWN_NAME;
     private String command ="";
 
     public StreamPreferences(){
