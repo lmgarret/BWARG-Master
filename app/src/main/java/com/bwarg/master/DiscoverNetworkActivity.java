@@ -35,6 +35,7 @@ import javax.jmdns.ServiceListener;
 public class DiscoverNetworkActivity extends ActionBarActivity{
     private final static String TAG = "DiscoverNetworkActivity";
     private static final int DISCOVER_PORT_DEF = 8888;
+    public static boolean USE_NSD_MANAGER = false;
 
     private CustomArrayAdapter cAdapter;
     private ArrayList<ServerProfile> profilesLists = new ArrayList<>();
@@ -86,7 +87,7 @@ public class DiscoverNetworkActivity extends ActionBarActivity{
             discoveryTask.closeNetworkDiscovery();
         discoveryTask = new Task();
         discoveryTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");*/
-        if(clientTask == null)
+        if(clientTask == null && USE_NSD_MANAGER)
             clientTask = new NetworkClientTask();
         clientTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
     }
@@ -129,7 +130,7 @@ public class DiscoverNetworkActivity extends ActionBarActivity{
             mNsdManager.discoverServices(
                     SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
         }*/
-        if(clientTask == null) {
+        if(clientTask == null && USE_NSD_MANAGER) {
             clientTask = new NetworkClientTask();
             clientTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
         }

@@ -29,6 +29,8 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
     public final static int SIZE_BEST_FIT = 4;
     public final static int SIZE_FULLSCREEN = 8;
 
+    public static boolean COMPENSATE_LENS_EFFECT = false;
+
     SurfaceHolder holder;
     Context saved_context;
 
@@ -144,6 +146,11 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
                             return;
                         }
 
+                        if(COMPENSATE_LENS_EFFECT) {
+                            Bitmap fishEyedBmp = fisheye(bmp, 5, 1.9);
+                            if(fishEyedBmp!= null)
+                                bmp = fishEyedBmp;
+                        }
                         destRect = destRect(bmp.getWidth(), bmp.getHeight());
 
                         c = mSurfaceHolder.lockCanvas();
@@ -333,5 +340,45 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
 
     public void setCamNum(int camNum) {
         this.camNum = camNum;
+    }
+
+    /**
+     *
+     * @param srcImage Image to be modified
+     * @param strength strength as floating point, >=0. 0=no change, high numbers equal stronger correction
+     * @param zoom zoom as floating poinr (>=1). (1=no change in zoom)
+     * @return A corrected image for lense distortion
+     */
+    public static Bitmap fisheye(Bitmap srcImage, double strength, double zoom) {
+        int width = srcImage.getWidth();
+        int height = srcImage.getHeight();
+        int halfWidth = width/2;
+        int halfHeight = height/2;
+
+        double strengthCorr = strength;
+        if(strengthCorr == 0) strengthCorr = 0.00001;
+        double correctionRadius = Math.sqrt(width*width+height*height)/strengthCorr;
+
+        int[] dstPixels = new int[(int)(width*height)];
+
+        for(int x=0; x<width; x++){
+            for(int y = 0; y<height; y++){
+                int newX = x - halfWidth;
+                int newY = y - halfHeight;
+
+                double distance = Math.sqrt(newX*newX + newY*newY);
+                double r = distance/correctionRadius;
+
+                double theta = 1;
+                if(r != 0) theta = Math.atan(r)/r;
+
+                double sourceX = halfWidth + theta * newX * zoom;
+                double sourceY = halfHeight + theta * newY * zoom;
+                if(sourceX >=0 && sourceY >=0 && sourceX < width && sourceY < height){
+                    dstPixels[(int)(y*width+x)] = srcImage.getPixel((int)sourceX, (int)sourceY);
+                }
+            }
+        }
+        return Bitmap.createBitmap(dstPixels, width, height, srcImage.getConfig());
     }
 }
