@@ -76,6 +76,7 @@ public class MjpegActivity extends ActionBarActivity {
         //URLLeft = new String(getURL(shPrefLeft));
 
         setContentView(R.layout.main);
+
         mvLeft = (MjpegView) findViewById(R.id.mvLeft);
         mvLeft.setCamNum(1);
         if (mvLeft != null) {

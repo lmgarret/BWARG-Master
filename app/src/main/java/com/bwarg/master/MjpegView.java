@@ -4,17 +4,28 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.media.effect.Effect;
+import android.media.effect.EffectContext;
+import android.media.effect.EffectFactory;
+import android.opengl.GLES20;
+import android.opengl.GLUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
 
@@ -29,7 +40,7 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
     public final static int SIZE_BEST_FIT = 4;
     public final static int SIZE_FULLSCREEN = 8;
 
-    public static boolean COMPENSATE_LENS_EFFECT = false;
+    public static boolean COMPENSATE_LENS_EFFECT = true;
 
     SurfaceHolder holder;
     Context saved_context;
@@ -124,6 +135,7 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
             Paint p = new Paint();
             Bitmap ovl = null;
 
+
             while (mRun) {
 
                 Rect destRect = null;
@@ -140,23 +152,24 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
                             return;
                         }*/
                         bmp = mIn.readMjpegFrame();
+
                         if(bmp == null){
                             ((MjpegActivity) saved_context).setImageError(camNum);
                             Log.d(TAG, "Received null frame");
                             return;
                         }
 
-                        if(COMPENSATE_LENS_EFFECT) {
-                            Bitmap fishEyedBmp = fisheye(bmp, 5, 1.9);
-                            if(fishEyedBmp!= null)
-                                bmp = fishEyedBmp;
-                        }
                         destRect = destRect(bmp.getWidth(), bmp.getHeight());
 
                         c = mSurfaceHolder.lockCanvas();
                         synchronized (mSurfaceHolder) {
+                            if(COMPENSATE_LENS_EFFECT) {
+                                //TODO implement fisheye effect
+                                c.drawBitmap(bmp, null, destRect, p);
 
-                            c.drawBitmap(bmp, null, destRect, p);
+                            }else{
+                                c.drawBitmap(bmp, null, destRect, p);
+                            }
 
                             if (showFps) {
                                 p.setXfermode(mode);

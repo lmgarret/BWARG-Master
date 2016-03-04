@@ -106,6 +106,11 @@ public class CamSettingsActivity extends ActionBarActivity {
             if(!streamPrefs.getName().equals(StreamPreferences.UNKNOWN_NAME)){
                 title+=": "+streamPrefs.getName();
             }
+            if(streamPrefs.hasNo_port()){
+                port_group.check(R.id.no_port_radiobutton);
+            }else if(streamPrefs.getIp_port() == 8080){
+                port_group.check(R.id.port_8080);
+            }
             setTitle(title);
         }else{
             fillUI(streamPrefs);
@@ -201,6 +206,10 @@ public class CamSettingsActivity extends ActionBarActivity {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.port_8080) {
                     port_input.setText(getString(R.string.port_8080));
+                    streamPrefs.setNo_port(false);
+                }else if (checkedId == R.id.no_port_radiobutton){
+                    port_input.setText("");
+                    streamPrefs.setNo_port(true);
                 }
             }
         });
@@ -240,6 +249,9 @@ public class CamSettingsActivity extends ActionBarActivity {
                         s = port_input.getText().toString();
                         if (!"".equals(s)) {
                             streamPrefs.setIp_port(Integer.parseInt(s));
+                            streamPrefs.setNo_port(false);
+                        }else{
+                            streamPrefs.setNo_port(true);
                         }
                         streamPrefs.setCommand(command_input.getText().toString());
 
@@ -303,7 +315,8 @@ public class CamSettingsActivity extends ActionBarActivity {
         address2_input.setText(String.valueOf(streamPrefs.getIp_ad2()), BufferType.NORMAL);
         address3_input.setText(String.valueOf(streamPrefs.getIp_ad3()), BufferType.NORMAL);
         address4_input.setText(String.valueOf(streamPrefs.getIp_ad4()), BufferType.NORMAL);
-        port_input.setText(String.valueOf(streamPrefs.getIp_port()), BufferType.NORMAL);
+        if(!streamPrefs.hasNo_port())
+            port_input.setText(String.valueOf(streamPrefs.getIp_port()), BufferType.NORMAL);
 
         command_input.setText(streamPrefs.getCommand(), BufferType.NORMAL);
     }

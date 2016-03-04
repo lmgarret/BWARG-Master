@@ -18,38 +18,10 @@ public class StreamPreferences {
     private String URL = "";
     private String name = UNKNOWN_NAME;
     private String command ="";
+    private boolean no_port = false;
 
     public StreamPreferences(){
 
-    }
-    public StreamPreferences(int[] ip, int width, int height){
-        if(ip.length == 5) {
-            this.ip_ad1 = ip[0];
-            this.ip_ad2 = ip[1];
-            this.ip_ad3 = ip[2];
-            this.ip_ad4 = ip[3];
-            this.ip_port = ip[4];
-
-            StringBuilder sb = new StringBuilder();
-            String s_http = "http://";
-            String s_dot = ".";
-            String s_colon = ":";
-            String s_slash = "/";
-            sb.append(s_http);
-            sb.append(ip_ad1);
-            sb.append(s_dot);
-            sb.append(ip_ad2);
-            sb.append(s_dot);
-            sb.append(ip_ad3);
-            sb.append(s_dot);
-            sb.append(ip_ad4);
-            sb.append(s_colon);
-            sb.append(ip_port);
-            sb.append(s_slash);
-            URL = new String(sb);
-        }else{
-            throw new IllegalArgumentException("IP length too small!");
-        }
     }
 
     public int getWidth() {
@@ -94,8 +66,10 @@ public class StreamPreferences {
         sb.append(ip_ad3);
         sb.append(s_dot);
         sb.append(ip_ad4);
-        sb.append(s_colon);
-        sb.append(ip_port);
+        if(!hasNo_port()){
+            sb.append(s_colon);
+            sb.append(ip_port);
+        }
         sb.append(s_slash);
         URL = new String(sb);
         return URL;
@@ -147,6 +121,14 @@ public class StreamPreferences {
 
     public void setCommand(String command) {
         this.command = command;
+    }
+
+    public boolean hasNo_port() {
+        return no_port;
+    }
+
+    public void setNo_port(boolean no_port) {
+        this.no_port = no_port;
     }
 
     public static String defaultGsonString(){
