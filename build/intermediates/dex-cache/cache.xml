@@ -16,6 +16,20 @@
         <dex dex="D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\build\intermediates\pre-dexed\debug\com.android.support-support-v4-22.2.1_27fc06c424338a9544e339c4d63992f45f7c0ee6.jar" />
     </item>
     <item
+        jar="D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\libs\jmdns-3.4.2.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="31165b85f0ff5db2c4686cfddba1b5bc3136a301">
+        <dex dex="D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\build\intermediates\pre-dexed\debug\jmdns-3.4.2_c36518ef4f16d534c7b27c696075a4b8176b0513.jar" />
+    </item>
+    <item
+        jar="D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\libs\gson-2.6.1.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="b9d63507329a7178e026fc334f87587ee5070ac5">
+        <dex dex="D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\build\intermediates\pre-dexed\debug\gson-2.6.1_a9dee6f7670d0a4e6b74c0f9d9e9c9df1b13f0de.jar" />
+    </item>
+    <item
         jar="D:\Google Drive\Projects\BWARG\Android\BWARG (Master)\app\build\intermediates\exploded-aar\com.android.support\support-v4\22.2.1\jars\libs\internal_impl-22.2.1.jar"
         jumboMode="false"
         revision="22.0.1"

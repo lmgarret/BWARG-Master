@@ -4,17 +4,28 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.media.effect.Effect;
+import android.media.effect.EffectContext;
+import android.media.effect.EffectFactory;
+import android.opengl.GLES20;
+import android.opengl.GLUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
 
@@ -28,6 +39,8 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
     public final static int SIZE_STANDARD = 1;
     public final static int SIZE_BEST_FIT = 4;
     public final static int SIZE_FULLSCREEN = 8;
+
+    public static boolean COMPENSATE_LENS_EFFECT = true;
 
     SurfaceHolder holder;
     Context saved_context;
@@ -122,6 +135,7 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
             Paint p = new Paint();
             Bitmap ovl = null;
 
+
             while (mRun) {
 
                 Rect destRect = null;
@@ -138,6 +152,7 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
                             return;
                         }*/
                         bmp = mIn.readMjpegFrame();
+
                         if(bmp == null){
                             ((MjpegActivity) saved_context).setImageError(camNum);
                             Log.d(TAG, "Received null frame");
@@ -148,8 +163,13 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
 
                         c = mSurfaceHolder.lockCanvas();
                         synchronized (mSurfaceHolder) {
+                            if(COMPENSATE_LENS_EFFECT) {
+                                //TODO implement fisheye effect
+                                c.drawBitmap(bmp, null, destRect, p);
 
-                            c.drawBitmap(bmp, null, destRect, p);
+                            }else{
+                                c.drawBitmap(bmp, null, destRect, p);
+                            }
 
                             if (showFps) {
                                 p.setXfermode(mode);
@@ -333,5 +353,45 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
 
     public void setCamNum(int camNum) {
         this.camNum = camNum;
+    }
+
+    /**
+     *
+     * @param srcImage Image to be modified
+     * @param strength strength as floating point, >=0. 0=no change, high numbers equal stronger correction
+     * @param zoom zoom as floating poinr (>=1). (1=no change in zoom)
+     * @return A corrected image for lense distortion
+     */
+    public static Bitmap fisheye(Bitmap srcImage, double strength, double zoom) {
+        int width = srcImage.getWidth();
+        int height = srcImage.getHeight();
+        int halfWidth = width/2;
+        int halfHeight = height/2;
+
+        double strengthCorr = strength;
+        if(strengthCorr == 0) strengthCorr = 0.00001;
+        double correctionRadius = Math.sqrt(width*width+height*height)/strengthCorr;
+
+        int[] dstPixels = new int[(int)(width*height)];
+
+        for(int x=0; x<width; x++){
+            for(int y = 0; y<height; y++){
+                int newX = x - halfWidth;
+                int newY = y - halfHeight;
+
+                double distance = Math.sqrt(newX*newX + newY*newY);
+                double r = distance/correctionRadius;
+
+                double theta = 1;
+                if(r != 0) theta = Math.atan(r)/r;
+
+                double sourceX = halfWidth + theta * newX * zoom;
+                double sourceY = halfHeight + theta * newY * zoom;
+                if(sourceX >=0 && sourceY >=0 && sourceX < width && sourceY < height){
+                    dstPixels[(int)(y*width+x)] = srcImage.getPixel((int)sourceX, (int)sourceY);
+                }
+            }
+        }
+        return Bitmap.createBitmap(dstPixels, width, height, srcImage.getConfig());
     }
 }

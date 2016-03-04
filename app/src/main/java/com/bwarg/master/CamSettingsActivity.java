@@ -92,16 +92,26 @@ public class CamSettingsActivity extends ActionBarActivity {
 
             cam_number = extras.getInt("cam_number", cam_number);
 
-            Log.d("MJPEG_Cam" + cam_number, " received URL " + streamPrefs.getURL()+streamPrefs.getCommand() + " in CamSettingsActivity.");
+            Log.d("MJPEG_Cam" + cam_number, " received URL " + streamPrefs.getURL() + streamPrefs.getCommand() + " in CamSettingsActivity.");
             resolution_spinner.setSelection(adapter.getCount() - 1);
 
             fillUI(streamPrefs);
 
+            String title = "Stream";
             if(cam_number == 1){
-                setTitle(getResources().getString(R.string.title_settings_left));
+                title = getResources().getString(R.string.title_settings_left);
             }else if (cam_number == 2){
-                setTitle(getResources().getString(R.string.title_settings_right));
+                title = getResources().getString(R.string.title_settings_right);
             }
+            if(!streamPrefs.getName().equals(StreamPreferences.UNKNOWN_NAME)){
+                title+=": "+streamPrefs.getName();
+            }
+            if(streamPrefs.hasNo_port()){
+                port_group.check(R.id.no_port_radiobutton);
+            }else if(streamPrefs.getIp_port() == 8080){
+                port_group.check(R.id.port_8080);
+            }
+            setTitle(title);
         }else{
             fillUI(streamPrefs);
             Log.d("MJPEG_Cam"+cam_number, " null args received");
@@ -196,6 +206,10 @@ public class CamSettingsActivity extends ActionBarActivity {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.port_8080) {
                     port_input.setText(getString(R.string.port_8080));
+                    streamPrefs.setNo_port(false);
+                }else if (checkedId == R.id.no_port_radiobutton){
+                    port_input.setText("");
+                    streamPrefs.setNo_port(true);
                 }
             }
         });
@@ -235,6 +249,9 @@ public class CamSettingsActivity extends ActionBarActivity {
                         s = port_input.getText().toString();
                         if (!"".equals(s)) {
                             streamPrefs.setIp_port(Integer.parseInt(s));
+                            streamPrefs.setNo_port(false);
+                        }else{
+                            streamPrefs.setNo_port(true);
                         }
                         streamPrefs.setCommand(command_input.getText().toString());
 
@@ -275,7 +292,7 @@ public class CamSettingsActivity extends ActionBarActivity {
         }
     }
     public void openNetworkDiscovery(View v){
-        Intent intent = new Intent(this, DiscoverUDPActivity.class);
+        Intent intent = new Intent(this, DiscoverNetworkActivity.class);
         startActivityForResult(intent, REQUEST_SETTINGS_UDP);
     }
     @Override
@@ -298,7 +315,8 @@ public class CamSettingsActivity extends ActionBarActivity {
         address2_input.setText(String.valueOf(streamPrefs.getIp_ad2()), BufferType.NORMAL);
         address3_input.setText(String.valueOf(streamPrefs.getIp_ad3()), BufferType.NORMAL);
         address4_input.setText(String.valueOf(streamPrefs.getIp_ad4()), BufferType.NORMAL);
-        port_input.setText(String.valueOf(streamPrefs.getIp_port()), BufferType.NORMAL);
+        if(!streamPrefs.hasNo_port())
+            port_input.setText(String.valueOf(streamPrefs.getIp_port()), BufferType.NORMAL);
 
         command_input.setText(streamPrefs.getCommand(), BufferType.NORMAL);
     }

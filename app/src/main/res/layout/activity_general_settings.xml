@@ -48,14 +48,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/compression_method_label"
-            android:layout_margin="10dp" />
+            android:layout_margin="10dp"
+            android:visibility="gone" />
 
         <RadioGroup
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="start"
-            android:layout_marginLeft="20dp">
+            android:layout_marginLeft="20dp"
+            android:visibility="gone">
 
             <RadioButton
                 android:layout_width="wrap_content"
