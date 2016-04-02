@@ -105,16 +105,10 @@
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/show_fps_label"
-                android:id="@+id/checkBox_fps"
+                android:text="@string/verbose_mode_label"
+                android:id="@+id/verbose_mode_checkbox"
                 android:onClick="onCheckboxClicked" />
 
-            <CheckBox
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/show_status_label"
-                android:id="@+id/checkBox_log"
-                android:onClick="onCheckboxClicked" />
         </LinearLayout>
 
         <Button android:id="@+id/general_settings_done"

@@ -1,1 +1,1 @@
-include ':app'
+include ':app', ':blaubot-android-2.0.0-beta.1'

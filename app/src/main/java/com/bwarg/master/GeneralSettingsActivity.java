@@ -5,13 +5,11 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
-import android.text.Layout;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.LinearLayout;
 
 import com.google.gson.Gson;
 
@@ -47,11 +45,8 @@ public class GeneralSettingsActivity extends ActionBarActivity {
                     }
                 }
         );
-        CheckBox checkBoxFPS = (CheckBox) findViewById(R.id.checkBox_fps);
-        checkBoxFPS.setChecked(MjpegActivity.SHOW_FPS);
-
-        CheckBox checkBoxStatus = (CheckBox) findViewById(R.id.checkBox_log);
-        checkBoxStatus.setChecked(MjpegActivity.SHOW_CAMERA_STATUS);
+        CheckBox verbose_mode_checkbox = (CheckBox) findViewById(R.id.verbose_mode_checkbox);
+        verbose_mode_checkbox.setChecked(MjpegActivity.VERBOSE_MODE);
     }
     public void onCheckboxClicked(View view) {
         // Is the view now checked?
@@ -59,12 +54,8 @@ public class GeneralSettingsActivity extends ActionBarActivity {
 
         // Check which checkbox was clicked
         switch(view.getId()) {
-            case R.id.checkBox_fps:
-                MjpegActivity.SHOW_FPS=checked;
-                break;
-            case R.id.checkBox_log:
-                MjpegActivity.SHOW_CAMERA_STATUS = checked;
-                break;
+            case R.id.verbose_mode_checkbox:
+                MjpegActivity.VERBOSE_MODE = checked;
             default:
                 break;
         }

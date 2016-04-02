@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/BWARG (Master).iml" filepath="$PROJECT_DIR$/BWARG (Master).iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/blaubot-android-2.0.0-beta.1/blaubot-android-2.0.0-beta.1.iml" filepath="$PROJECT_DIR$/blaubot-android-2.0.0-beta.1/blaubot-android-2.0.0-beta.1.iml" />
     </modules>
   </component>
 </project>

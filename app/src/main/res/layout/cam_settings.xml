@@ -19,7 +19,17 @@
                 android:orientation="horizontal"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"></LinearLayout>
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/image_settings_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/image_settings_label"
+                    android:layout_marginLeft="50dp"
+                    android:layout_marginRight="50dp"
+                    android:singleLine="false" />
+            </LinearLayout>
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -27,7 +37,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp">
+                android:layout_marginRight="20dp"
+                android:visibility="gone">
                 <EditText
                     android:id="@+id/width_input"
                     android:layout_width="80dp"

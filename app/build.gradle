@@ -16,12 +16,21 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
-
+    packagingOptions {
+        pickFirst 'META-INF/LICENSE.txt'
+        pickFirst 'META-INF/NOTICE.txt'
+        pickFirst 'META-INF/INDEX.LIST'
+    }
     sourceSets.main.jni.srcDirs = []
 }
 dependencies {
     compile 'com.android.support:support-v4:22.+'
     compile 'com.android.support:appcompat-v7:22.0.+'
+    //compile 'eu.hgross:blaubot-android:2+'
+    //compile 'eu.hgross:blaubot-websockets:2+'
     compile files('libs/gson-2.6.1.jar')
-    compile files('libs/jmdns-3.4.2.jar')
+    compile files('libs/blaubot-2.0.0-beta.1.jar')
+    compile project(':blaubot-android-2.0.0-beta.1')
+    //compile files('libs/jmdns-3.4.2.jar')
+    // optional
 }

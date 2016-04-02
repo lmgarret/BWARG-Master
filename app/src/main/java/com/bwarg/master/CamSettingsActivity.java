@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 
 public class CamSettingsActivity extends ActionBarActivity {
 
+    Button image_settings_button;
     Button settings_done;
 
     Spinner resolution_spinner;
@@ -213,7 +214,8 @@ public class CamSettingsActivity extends ActionBarActivity {
                 }
             }
         });
-
+        image_settings_button = (Button) findViewById(R.id.image_settings_button);
+        image_settings_button.setEnabled(false); //TODO implement blaubot lib and enable if ip corresponds to a blaubot client
         settings_done = (Button) findViewById(R.id.settings_done);
         settings_done.setOnClickListener(
                 new View.OnClickListener() {

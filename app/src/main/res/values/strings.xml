@@ -56,6 +56,8 @@
     <string name="show_status_label">Show camera status</string>
     <string name="network_discovery">Network Scan</string>
     <string name="no_port_label">No port</string>
+    <string name="image_settings_label">Image settings</string>
+    <string name="verbose_mode_label">Verbose mode</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"
 

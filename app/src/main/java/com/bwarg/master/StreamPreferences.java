@@ -1,15 +1,41 @@
 package com.bwarg.master;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
+
+import java.net.InetAddress;
+import java.util.ArrayList;
 
 /**
  * Created by LM on 10.02.2016.
  */
 public class StreamPreferences {
+    public final static String TAG = "StreamPreferences";
     public final static String UNKNOWN_NAME = "(Unknown)";
+
+    //Images setting attributes
     private int width = 640;
     private int height = 480;
 
+    private ArrayList<Resolution> supportedResolutions = new ArrayList<>();
+    private boolean useFlashLight = false;
+    private int quality = 40;
+    private boolean auto_exposure_lock = false;
+    private boolean auto_exposure_lock_supported = false;
+    private boolean auto_white_balance_lock = false;
+    private boolean auto_white_balance_lock_supported = false;
+    private String white_balance = "auto";
+    private String focus_mode = "auto";
+    private boolean image_stabilization = false;
+    private boolean image_stabilization_supported = false;
+    private String iso = "auto";
+    private int fast_fps_mode = 0;
+    private boolean fast_fps_mode_supported = false;
+    private int sizeIndex = 0;
+
+    //Network settings attributes
+    private String device_unique_id = "None";
     private int ip_ad1 = 192;
     private int ip_ad2 = 168;
     private int ip_ad3 = 2;
@@ -103,8 +129,30 @@ public class StreamPreferences {
         this.ip_port = ip_port;
     }
 
-    public void setURL(String URL) {
-        this.URL = URL;
+    public void setIpNoPort(String ip){
+        int[] ipResult = new int[5];
+        String temp = "";
+
+        int ipIndex = 0;
+        for (int i=0; i<ip.length(); i++){
+            char c = ip.charAt(i);
+            if(Character.isDigit(c)){
+                temp+=c;
+            }else if( c == '.' || c== ':'){
+                ipResult[ipIndex] = Integer.parseInt(temp);
+                ipIndex++;
+                temp = "";
+            }
+        }
+        if(!temp.equals("")){
+            ipResult[ipIndex] = Integer.parseInt(temp);
+            ipIndex++;
+            temp = "";
+        }
+        ip_ad1 = ipResult[0];
+        ip_ad2 = ipResult[1];
+        ip_ad3 = ipResult[2];
+        ip_ad4 = ipResult[3];
     }
 
     public String getName() {
@@ -131,8 +179,106 @@ public class StreamPreferences {
         this.no_port = no_port;
     }
 
+    public boolean isAutoExposureLockSupported() {
+        return auto_exposure_lock_supported;
+    }
+
+    public void setAutoExposureLockSupported(boolean auto_exposure_lock_supported) {
+        this.auto_exposure_lock_supported = auto_exposure_lock_supported;
+    }
+
+    public boolean isAutoWhiteBalanceLockSupported() {
+        return auto_white_balance_lock_supported;
+    }
+
+    public void setAutoWhiteBalanceLockSupported(boolean auto_white_balance_lock_supported) {
+        this.auto_white_balance_lock_supported = auto_white_balance_lock_supported;
+    }
+
+    public boolean isImageStabilizationSupported() {
+        return image_stabilization_supported;
+    }
+
+    public void setImageStabilizationSupported(boolean image_stabilization_supported) {
+        this.image_stabilization_supported = image_stabilization_supported;
+    }
+
+    public boolean isFastFpsModeSupported() {
+        return fast_fps_mode_supported;
+    }
+
+    public void setFastFpsModeSupported(boolean fast_fps_mode_supported) {
+        this.fast_fps_mode_supported = fast_fps_mode_supported;
+    }
     public static String defaultGsonString(){
         Gson gson = new Gson();
         return gson.toJson(new StreamPreferences());
+    }
+
+    public class Resolution{
+        private int index=0;
+        private String resolution = "unknown";
+
+        Resolution(int index, String resolution){
+            this.index = index;
+            this.resolution = resolution;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public void setIndex(int index) {
+            this.index = index;
+        }
+
+        public String getResolution() {
+            return resolution;
+        }
+
+        public void setResolution(String resolution) {
+            this.resolution = resolution;
+        }
+
+    }
+
+    public int getSizeIndex() {
+        return sizeIndex;
+    }
+
+    public void setSizeIndex(int sizeIndex) {
+        this.sizeIndex = sizeIndex;
+    }
+
+    public String getDeviceUniqueId() {
+        return device_unique_id;
+    }
+
+    public void setDeviceUniqueId(String device_unique_id) {
+        this.device_unique_id = device_unique_id;
+    }
+
+    public void copyFrom(SlaveStreamPreferences streamPreferences){
+        this.auto_exposure_lock = streamPreferences.getAutoExposureLock();
+        this.auto_exposure_lock_supported = streamPreferences.isAutoExposureLockSupported();
+        this.auto_white_balance_lock = streamPreferences.getAutoWhiteBalanceLock();
+        this.auto_white_balance_lock_supported = streamPreferences.isAutoWhiteBalanceLockSupported();
+        this.fast_fps_mode = streamPreferences.getFastFpsMode();
+        this.fast_fps_mode_supported = streamPreferences.isFastFpsModeSupported();
+        this.focus_mode = streamPreferences.getFocusMode();
+        this.image_stabilization = streamPreferences.getImageStabilization();
+        this.image_stabilization_supported = streamPreferences.isImageStabilizationSupported();
+        this.iso = streamPreferences.getIso();
+        this.name = streamPreferences .getName();
+        this.quality = streamPreferences.getQuality();
+        this.useFlashLight = streamPreferences.useFlashLight();
+        this.white_balance = streamPreferences.getWhiteBalance();
+        this.sizeIndex = streamPreferences.getSizeIndex();
+        ArrayList<Resolution> resolutions_supported = new ArrayList<>();
+        for(int i = 0; i< streamPreferences.getResolutionsSupported().size(); i++){
+            resolutions_supported.add(new Resolution(i, streamPreferences.getResolutionsSupported().get(i)));
+        }
+        this.supportedResolutions = resolutions_supported;
+        this.setIpNoPort(streamPreferences.getIpAdress());
     }
 }

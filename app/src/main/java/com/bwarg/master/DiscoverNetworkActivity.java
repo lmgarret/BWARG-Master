@@ -27,10 +27,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
-import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceEvent;
-import javax.jmdns.ServiceInfo;
-import javax.jmdns.ServiceListener;
 
 public class DiscoverNetworkActivity extends ActionBarActivity{
     private final static String TAG = "DiscoverNetworkActivity";
