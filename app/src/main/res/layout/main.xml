@@ -83,7 +83,7 @@
                 android:src="@drawable/exposure_unlocked"
                 android:background="@null"
                 android:scaleType="centerCrop"
-                android:onClick="toggleExposure"
+                android:onClick="toggleExposureLock"
                 android:layout_margin="5dp"
                 android:id="@+id/auto_exposure_lock_button" />
         </LinearLayout>

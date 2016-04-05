@@ -54,7 +54,7 @@ public class MjpegActivity extends ActionBarActivity {
 
     private MjpegView mvLeft = null;
     private MjpegView mvRight = null;
-    private ImageButton exposure_lock_button;
+    private ImageButton exposure_lock_button = null;
 
     private LinearLayout statusLayout = null;
 
@@ -89,13 +89,13 @@ public class MjpegActivity extends ActionBarActivity {
         //SHOW_FPS = sharedPrefs.getBoolean("show_fps", true);
         //SHOW_CAMERA_STATUS = sharedPrefs.getBoolean("show_status", true);
         VERBOSE_MODE = sharedPrefs.getBoolean("hide_mode", false);
+        setContentView(R.layout.main);
+
         exposure_lock_button = (ImageButton) findViewById(R.id.auto_exposure_lock_button);
 
         streamPrefLeft = loadPreferences(sharedPrefs, 1);
         streamPrefRight = loadPreferences(sharedPrefs, 2);
         //URLLeft = new String(getURL(shPrefLeft));
-
-        setContentView(R.layout.main);
 
         mvLeft = (MjpegView) findViewById(R.id.mvLeft);
         mvLeft.setCamNum(1);
@@ -128,7 +128,8 @@ public class MjpegActivity extends ActionBarActivity {
         IBlaubotBeacon beacon = new BlaubotBonjourBeacon(tryGetIpV4Address(), APP_PORT);
         IBlaubotAdapter adapter = new BlaubotEthernetAdapter(new BlaubotDevice(),APP_PORT+1,tryGetIpV4Address());
         //blaubot = BlaubotAndroidFactory.createBlaubot(APP_UUID_STRING,adapter, beacon);
-        blaubot = BlaubotAndroidFactory.createEthernetBlaubotWithBluetoothBeacon(APP_UUID, APP_PORT, tryGetIpV4Address());
+        blaubot = BlaubotAndroidFactory.createBlaubot(APP_UUID, new BlaubotDevice(), adapter, beacon);
+        //blaubot = BlaubotAndroidFactory.createEthernetBlaubotWithBluetoothBeacon(APP_UUID, APP_PORT, tryGetIpV4Address());
         blaubot.startBlaubot();
         blaubot.registerReceivers(this);
         blaubot.setContext(this);
@@ -143,31 +144,35 @@ public class MjpegActivity extends ActionBarActivity {
                 // deserialize
                 String msg = new String(message.getPayload());
                 //Structure of messages : HEADER_[fromID]XXX_[toID]XXX_DATA
-                String header = msg.substring(0,2);
-                int fromIDIndex = msg.indexOf("_[fromID]")+9;
-                int toIDIndex = msg.indexOf("_[toID]")+7;
-                int dataIndex = msg.indexOf("_[data]")+7;
+                Log.d(TAG_BLAUBOT, "Received message : \""+msg+"\"");
+                if(msg.contains("_[fromID]") && msg.contains("_[toID]")&&msg.contains("_[data]")) {
+                    String header = msg.substring(0,2);
+                    int fromIDIndex = msg.indexOf("_[fromID]")+9;
+                    int toIDIndex = msg.indexOf("_[toID]")+7;
+                    int dataIndex = msg.indexOf("_[data]")+7;
 
-                String fromID = msg.substring(fromIDIndex, toIDIndex-7);
-                String toID = msg.substring(toIDIndex, dataIndex-7);
-                String data = msg.substring(dataIndex);
+                    String fromID = msg.substring(fromIDIndex, toIDIndex-7);
+                    String toID = msg.substring(toIDIndex, dataIndex-7);
+                    String data = msg.substring(dataIndex);
 
-                switch(header){
-                    case "SSP" : //manage complete settings rewrite here
-                        if(toID.equals(blaubot.getOwnDevice().getUniqueDeviceID())) {
-                            SlaveStreamPreferences prefs = SlaveStreamPreferences.fromGson(data);
-                            if(prefs.getPreferredSide() == SlaveStreamPreferences.SIDE_LEFT){
-                                streamPrefLeft.copyFrom(prefs);
-                                streamPrefLeft.setDeviceUniqueId(fromID);
-                            }else if(prefs.getPreferredSide() == SlaveStreamPreferences.SIDE_RIGHT){
-                                streamPrefRight.copyFrom(prefs);
-                                streamPrefRight.setDeviceUniqueId(fromID);
+                    switch(header){
+                        case "SSP" : //manage complete settings rewrite here
+                            if(toID.equals(blaubot.getOwnDevice().getUniqueDeviceID())) {
+                                SlaveStreamPreferences prefs = SlaveStreamPreferences.fromGson(data);
+                                if(prefs.getPreferredSide() == SlaveStreamPreferences.SIDE_LEFT){
+                                    streamPrefLeft.copyFrom(prefs);
+                                    streamPrefLeft.setDeviceUniqueId(fromID);
+                                }else if(prefs.getPreferredSide() == SlaveStreamPreferences.SIDE_RIGHT){
+                                    streamPrefRight.copyFrom(prefs);
+                                    streamPrefRight.setDeviceUniqueId(fromID);
+                                }
                             }
-                        }
-                        break;
-                    default : break;
+                            break;
+                        default : break;
+                    }
+                }else{
+                    Log.d(TAG_BLAUBOT, "Not a valid message.");
                 }
-                Log.i(TAG_BLAUBOT, "Received from channel : " + msg);
             }
         });
         blaubot.addLifecycleListener(new ILifecycleListener() {
@@ -192,7 +197,6 @@ public class MjpegActivity extends ActionBarActivity {
                 // THIS device connected to a network
                 // you can now subscribe to channels and use them:
                 mainChannel.subscribe();
-                mainChannel.publish("Master is online".getBytes());
                 // onDeviceJoined(...) calls will follow for each OTHER device that was already connected
             }
 
@@ -211,8 +215,6 @@ public class MjpegActivity extends ActionBarActivity {
         new DoRead(mvRight, 2, streamPrefRight).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, streamPrefRight.getURL()+streamPrefRight.getCommand());
 
     }
-
-
     public void onResume() {
         if (DEBUG) Log.d(TAG, "onResume()");
         super.onResume();
@@ -416,10 +418,9 @@ public class MjpegActivity extends ActionBarActivity {
     }
     public void toggleExposureLock(View v) {
         AUTO_EXPOSURE_LOCK = !AUTO_EXPOSURE_LOCK;
-        exposure_lock_button.setImageResource(AUTO_EXPOSURE_LOCK ? R.drawable.exposure_unlocked : R.drawable.exposure_locked);
-        mainChannel.publish(("AEL_[fromID]"+blaubot.getOwnDevice().getUniqueDeviceID()+"_[toID]"+streamPrefLeft.getDeviceUniqueId()+AUTO_EXPOSURE_LOCK).getBytes());
-        mainChannel.publish(("AEL_[fromID]"+blaubot.getOwnDevice().getUniqueDeviceID()+"_[toID]"+streamPrefRight.getDeviceUniqueId()+AUTO_EXPOSURE_LOCK).getBytes());
 
+        exposure_lock_button.setImageResource(AUTO_EXPOSURE_LOCK ? R.drawable.exposure_locked:R.drawable.exposure_unlocked);
+        mainChannel.publish(("AEL_[fromID]" + blaubot.getOwnDevice().getUniqueDeviceID() + "_[toID]" + "all" + "_[data]"+AUTO_EXPOSURE_LOCK).getBytes());
     }
     public void setTv(int camNum, String s){
         if(camNum == 1){
