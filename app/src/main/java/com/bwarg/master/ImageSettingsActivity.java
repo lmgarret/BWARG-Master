@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -175,65 +177,61 @@ public class ImageSettingsActivity extends ActionBarActivity {
         );
     }
     private void fillUI(SlaveStreamPreferences prefs){
-        final Camera camera = Camera.open(prefs.getCamIndex());
+        /*final Camera camera = Camera.open(prefs.getCamIndex());
         final Camera.Parameters params = camera.getParameters();
-        camera.release();
+        camera.release();*/
 
         quality_seekbar.setProgress(prefs.getQuality() - 1);
         quality_text.setText(String.valueOf(prefs.getQuality()) + "%");
 
-        auto_white_lock_checkBox.setEnabled(params.isAutoWhiteBalanceLockSupported());
+        auto_white_lock_checkBox.setEnabled(prefs.isAutoWhiteBalanceLockSupported());
         if(auto_white_lock_checkBox.isEnabled()) {
             auto_white_lock_checkBox.setChecked(prefs.getAutoWhiteBalanceLock());
         }else{
             prefs.setAutoWhiteBalanceLock(false);
         }
-        auto_exposure_lock_checkBoc.setEnabled(params.isAutoExposureLockSupported());
-        if((Build.MANUFACTURER+Build.MODEL).equals("samsungGT-I9300")){
+        auto_exposure_lock_checkBoc.setEnabled(prefs.isAutoExposureLockSupported());
+       /* if((Build.MANUFACTURER+Build.MODEL).equals("samsungGT-I9300")){
             auto_exposure_lock_checkBoc.setEnabled(false);
             Log.i(TAG, "Desactivated auto_exposure_lock on Galaxy S3, use main screen button or network command instead.");
-        }
+        }*/
         if(auto_exposure_lock_checkBoc.isEnabled()) {
             auto_exposure_lock_checkBoc.setChecked(prefs.getAutoExposureLock());
         }else{
             prefs.setAutoExposureLock(false);
         }
-        stabilize_image_checkBox.setEnabled(params.isVideoStabilizationSupported());
+        stabilize_image_checkBox.setEnabled(prefs.isImageStabilizationSupported());
         if(stabilize_image_checkBox.isEnabled()) {
             stabilize_image_checkBox.setChecked(prefs.getImageStabilization());
         }else{
             prefs.setImageStabilization(false);
         }
-       String fastFPSModeSupported = params.get("fast-fps-mode");
-        fast_fps_mode_checkBox.setEnabled(fastFPSModeSupported != null);
+        fast_fps_mode_checkBox.setEnabled(prefs.isFastFpsModeSupported());
         if(fast_fps_mode_checkBox.isEnabled()) {
             fast_fps_mode_checkBox.setChecked(streamPrefs.getFastFpsMode() == 1);
         }else{
             prefs.setFastFpsMode(0);
         }
-        initSpinners(prefs, params);
+        initSpinners(prefs);
     }
-    private void initSpinners(SlaveStreamPreferences prefs, Camera.Parameters params){
+    private void initSpinners(SlaveStreamPreferences prefs){
         //PREVIEW SIZES
-        final List<Camera.Size> supportedPreviewSizes = params.getSupportedPreviewSizes();
-        ArrayList<String> stringSupportedPreviewSizeList = new ArrayList<>();
-        for(Camera.Size s : supportedPreviewSizes) {
-            stringSupportedPreviewSizeList.add(s.width + "x" + s.height);
-        }
-        ArrayAdapter<String> sizeAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, stringSupportedPreviewSizeList);
+        ArrayAdapter<String> sizeAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, prefs.getResolutionsSupported());
         sizeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         resolution_spinner.setAdapter(sizeAdapter);
         resolution_spinner.setSelection(prefs.getSizeIndex());
 
         //WHITE BALANCES MODE
-        final List<String> supportedWhiteModes = params.getSupportedWhiteBalance();
-        ArrayAdapter<String> whiteAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, supportedWhiteModes);
+        /*final List<String> supportedWhiteModes = params.getSupportedWhiteBalance();
+        ArrayAdapter<String> whiteAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, prefs.getW);
         whiteAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         white_balance_spinner.setAdapter(whiteAdapter);
-        white_balance_spinner.setSelection(supportedWhiteModes.indexOf(prefs.getWhiteBalance()));
+        white_balance_spinner.setSelection(supportedWhiteModes.indexOf(prefs.getWhiteBalance()));*/
+        //TODO add white balances list as param of slavestreamprefs
+        white_balance_spinner.setEnabled(false);
 
         //ISO MODE
-        String isoModesString = params.get("iso-values");
+        /*String isoModesString = params.get("iso-values");
         if(isoModesString == null){
             //Looks like Acer did implemented it as iso-speed and not iso
             isoModesString = params.get("iso-speed-values");
@@ -260,17 +258,31 @@ public class ImageSettingsActivity extends ActionBarActivity {
             isoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             iso_spinner.setAdapter(isoAdapter);
             iso_spinner.setSelection(supportedISOModes.indexOf(prefs.getIso()));
-        }
+        }*/
+        //TODO add iso list as param of slavestreamprefs
+        iso_spinner.setEnabled(false);
 
 
         //FOCUS MODE
-        final List<String> supportedFocusModes = params.getSupportedFocusModes();
+        /*final List<String> supportedFocusModes = params.getSupportedFocusModes();
         ArrayAdapter<String> focusAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item, supportedFocusModes);
         focusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         focus_mode_spinner.setAdapter(focusAdapter);
-        focus_mode_spinner.setSelection(supportedFocusModes.indexOf(prefs.getFocusMode()));
+        focus_mode_spinner.setSelection(supportedFocusModes.indexOf(prefs.getFocusMode()));*/
+        //TODO add focus mode list as param of slavestreamprefs
+        focus_mode_spinner.setEnabled(false);
 
 
     }
-
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                fillUI(streamPrefs);
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

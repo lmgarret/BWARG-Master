@@ -45,6 +45,12 @@
             android:parentActivityName=".GeneralSettingsActivity"
             android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity
+            android:name=".ImageSettingsActivity"
+            android:label="@string/settings"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".GeneralSettingsActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+        <activity
             android:name=".GeneralSettingsActivity"
             android:label="@string/title_activity_general_settings"
             android:parentActivityName=".MjpegActivity"

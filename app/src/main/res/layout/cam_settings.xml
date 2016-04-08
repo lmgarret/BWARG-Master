@@ -28,7 +28,8 @@
                     android:text="@string/image_settings_label"
                     android:layout_marginLeft="50dp"
                     android:layout_marginRight="50dp"
-                    android:singleLine="false" />
+                    android:singleLine="false"
+                    android:onClick="openImageSettings" />
             </LinearLayout>
 
             <LinearLayout

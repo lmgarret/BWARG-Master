@@ -19,6 +19,7 @@ import android.widget.TextView.BufferType;
 import com.google.gson.Gson;
 
 public class CamSettingsActivity extends ActionBarActivity {
+    private static final int REQUEST_IMAGE_SETTINGS = 0;
 
     Button image_settings_button;
     Button settings_done;
@@ -215,7 +216,7 @@ public class CamSettingsActivity extends ActionBarActivity {
             }
         });
         image_settings_button = (Button) findViewById(R.id.image_settings_button);
-        image_settings_button.setEnabled(false); //TODO implement blaubot lib and enable if ip corresponds to a blaubot client
+
         settings_done = (Button) findViewById(R.id.settings_done);
         settings_done.setOnClickListener(
                 new View.OnClickListener() {
@@ -291,6 +292,17 @@ public class CamSettingsActivity extends ActionBarActivity {
                     fillUI(origStreamPrefs);
                 }
                 break;
+            case REQUEST_IMAGE_SETTINGS:
+                if (resultCode == Activity.RESULT_OK) {
+                    //left cam
+                    Gson gson = new Gson();
+                    streamPrefs = gson.fromJson(data.getStringExtra("stream_prefs"), StreamPreferences.class);
+                    MjpegActivity.BWARG_SERVER.sendSSPTo(streamPrefs.getDeviceUniqueId(), streamPrefs.toSSP());
+                    fillUI(streamPrefs);
+                }else if(resultCode == Activity.RESULT_CANCELED){
+                    fillUI(origStreamPrefs);
+                }
+                break;
         }
     }
     public void openNetworkDiscovery(View v){
@@ -356,5 +368,12 @@ public class CamSettingsActivity extends ActionBarActivity {
             streamPrefs.setIp_ad4(val);
 
         address_input.setText(String.valueOf(val), BufferType.NORMAL);
+    }
+    public void openImageSettings(View v){
+        Intent settings_intent = new Intent(CamSettingsActivity.this, ImageSettingsActivity.class);
+        Gson gson = new Gson();
+        settings_intent.putExtra("stream_prefs",gson.toJson(streamPrefs));
+
+        startActivityForResult(settings_intent, REQUEST_IMAGE_SETTINGS);
     }
 }

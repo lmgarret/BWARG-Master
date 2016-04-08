@@ -326,7 +326,6 @@ public class MjpegActivity extends ActionBarActivity {
         editor.putString("stream_prefs" + num, gson.toJson(streamPrefs));
     }
     public void openSettings(View v){
-        Intent intent = new Intent(this, CamSettingsActivity.class);
         Intent settings_intent = new Intent(MjpegActivity.this, GeneralSettingsActivity.class);
         Gson gson = new Gson();
         settings_intent.putExtra("stream_prefs1",gson.toJson(streamPrefLeft));

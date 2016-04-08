@@ -85,6 +85,15 @@ public class StreamPreferences {
         String s_colon = ":";
         String s_slash = "/";
         sb.append(s_http);
+        sb.append(getIP(true));
+        sb.append(s_slash);
+        URL = new String(sb);
+        return URL;
+    }
+    private String getIP(boolean withPort) {
+        StringBuilder sb = new StringBuilder();
+        String s_dot = ".";
+        String s_colon = ":";
         sb.append(ip_ad1);
         sb.append(s_dot);
         sb.append(ip_ad2);
@@ -92,11 +101,10 @@ public class StreamPreferences {
         sb.append(ip_ad3);
         sb.append(s_dot);
         sb.append(ip_ad4);
-        if(!hasNo_port()){
+        if(!hasNo_port()&&withPort){
             sb.append(s_colon);
             sb.append(ip_port);
         }
-        sb.append(s_slash);
         URL = new String(sb);
         return URL;
     }
@@ -280,5 +288,31 @@ public class StreamPreferences {
         }
         this.supportedResolutions = resolutions_supported;
         this.setIpNoPort(streamPreferences.getIpAdress());
+    }
+    public SlaveStreamPreferences toSSP(){
+        SlaveStreamPreferences ssp = new SlaveStreamPreferences();
+        ssp.setAutoExposureLock(this.auto_exposure_lock);
+        ssp.setAutoExposureLockSupported(this.auto_exposure_lock_supported);
+        ssp.setAutoWhiteBalanceLock(this.auto_white_balance_lock);
+        ssp.setAutoWhiteBalanceLockSupported(this.auto_white_balance_lock_supported);
+        ssp.setFastFpsMode(this.fast_fps_mode);
+        ssp.setFastFpsModeSupported(this.fast_fps_mode_supported);
+        ssp.setFocusMode(this.focus_mode);
+        ssp.setImageStabilization(this.image_stabilization);
+        ssp.setImageStabilizationSupported(this.isImageStabilizationSupported());
+        ssp.setIso(this.iso);
+        ssp.setName(this.name);
+        ssp.setQuality(this.quality);
+        ssp.setUseFlashLight(this.useFlashLight);
+        ssp.setWhiteBalance(this.white_balance);
+        ssp.setSizeIndex(this.sizeIndex);
+        ArrayList<String> resolutions_supported = new ArrayList<>();
+        for(int i = 0; i< this.supportedResolutions.size(); i++){
+            resolutions_supported.add(supportedResolutions.get(i).getResolution());
+        }
+        ssp.setResolutionsSupported(resolutions_supported);
+        ssp.setIpAdress(this.getIP(false));
+        ssp.setIpPort(this.getIp_port());
+        return ssp;
     }
 }

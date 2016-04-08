@@ -151,6 +151,10 @@ public class BwargServer extends Observable {
         Message.Broadcast message = new Message.Broadcast(Header.AEL, blaubot.getOwnDevice(), String.valueOf(auto_exposure_locked));
         mainChannel.publish((message.toString()).getBytes());
     }
+    public void sendSSPTo(String uuid,SlaveStreamPreferences prefs){
+        Message message = new Message(Header.SSP, blaubot.getOwnDevice().getUniqueDeviceID(),uuid, prefs.toGson());
+        mainChannel.publish((message.toString()).getBytes());
+    }
     private boolean receivedFromSelf(Message message){
         return  message.getFromID().equals(blaubot.getOwnDevice().getUniqueDeviceID());
     }
