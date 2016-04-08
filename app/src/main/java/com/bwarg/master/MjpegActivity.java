@@ -15,6 +15,8 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bwarg.master.network.BwargServer;
+import com.bwarg.master.network.SSPListener;
 import com.google.gson.Gson;
 
 import org.apache.http.conn.util.InetAddressUtils;
@@ -45,12 +47,8 @@ import eu.hgross.blaubot.messaging.IBlaubotMessageListener;
 public class MjpegActivity extends ActionBarActivity {
     private static final boolean DEBUG = false;
     private static final String TAG = "MJPEG";
-    private static final String TAG_BLAUBOT = TAG + "-BLAUBOT";
 
-    private static final String APP_UUID_STRING = "52260110-f8f0-11e5-a837-0800200c9a66";
-    private static final int APP_PORT = 5606;
-    private BlaubotAndroid blaubot;
-    private IBlaubotChannel mainChannel;
+    public static final BwargServer BWARG_SERVER = new BwargServer();
 
     private MjpegView mvLeft = null;
     private MjpegView mvRight = null;
@@ -90,6 +88,7 @@ public class MjpegActivity extends ActionBarActivity {
         //SHOW_CAMERA_STATUS = sharedPrefs.getBoolean("show_status", true);
         VERBOSE_MODE = sharedPrefs.getBoolean("hide_mode", false);
         setContentView(R.layout.main);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         exposure_lock_button = (ImageButton) findViewById(R.id.auto_exposure_lock_button);
 
@@ -123,91 +122,16 @@ public class MjpegActivity extends ActionBarActivity {
         else {
             statusLayout.setVisibility(View.INVISIBLE);
         }
-        final UUID APP_UUID = UUID.fromString(APP_UUID_STRING);
-        //blaubot = BlaubotAndroidFactory.createEthernetBlaubotWithBluetoothBeacon(APP_UUID, APP_PORT, tryGetIpV4Address());
-        IBlaubotBeacon beacon = new BlaubotBonjourBeacon(tryGetIpV4Address(), APP_PORT);
-        IBlaubotAdapter adapter = new BlaubotEthernetAdapter(new BlaubotDevice(),APP_PORT+1,tryGetIpV4Address());
-        //blaubot = BlaubotAndroidFactory.createBlaubot(APP_UUID_STRING,adapter, beacon);
-        blaubot = BlaubotAndroidFactory.createBlaubot(APP_UUID, new BlaubotDevice(), adapter, beacon);
-        //blaubot = BlaubotAndroidFactory.createEthernetBlaubotWithBluetoothBeacon(APP_UUID, APP_PORT, tryGetIpV4Address());
-        blaubot.startBlaubot();
-        blaubot.registerReceivers(this);
-        blaubot.setContext(this);
-        //blaubot.onResume(this);
-
-        mainChannel = blaubot.createChannel((short)1);
-        mainChannel.publish("Channel started".getBytes());
-        mainChannel.subscribe(new IBlaubotMessageListener() {
+        BWARG_SERVER.init(this, new SSPListener() {
             @Override
-            public void onMessage(BlaubotMessage message) {
-                // we got a message - our payload is a byte array
-                // deserialize
-                String msg = new String(message.getPayload());
-                //Structure of messages : HEADER_[fromID]XXX_[toID]XXX_DATA
-                Log.d(TAG_BLAUBOT, "Received message : \""+msg+"\"");
-                if(msg.contains("_[fromID]") && msg.contains("_[toID]")&&msg.contains("_[data]")) {
-                    String header = msg.substring(0,2);
-                    int fromIDIndex = msg.indexOf("_[fromID]")+9;
-                    int toIDIndex = msg.indexOf("_[toID]")+7;
-                    int dataIndex = msg.indexOf("_[data]")+7;
-
-                    String fromID = msg.substring(fromIDIndex, toIDIndex-7);
-                    String toID = msg.substring(toIDIndex, dataIndex-7);
-                    String data = msg.substring(dataIndex);
-
-                    switch(header){
-                        case "SSP" : //manage complete settings rewrite here
-                            if(toID.equals(blaubot.getOwnDevice().getUniqueDeviceID())) {
-                                SlaveStreamPreferences prefs = SlaveStreamPreferences.fromGson(data);
-                                if(prefs.getPreferredSide() == SlaveStreamPreferences.SIDE_LEFT){
-                                    streamPrefLeft.copyFrom(prefs);
-                                    streamPrefLeft.setDeviceUniqueId(fromID);
-                                }else if(prefs.getPreferredSide() == SlaveStreamPreferences.SIDE_RIGHT){
-                                    streamPrefRight.copyFrom(prefs);
-                                    streamPrefRight.setDeviceUniqueId(fromID);
-                                }
-                            }
-                            break;
-                        default : break;
-                    }
-                }else{
-                    Log.d(TAG_BLAUBOT, "Not a valid message.");
+            public void applySettings(SlaveStreamPreferences prefs, String fromID) {
+                if (prefs.getPreferredSide() == SlaveStreamPreferences.SIDE_LEFT) {
+                    streamPrefLeft.copyFrom(prefs);
+                    streamPrefLeft.setDeviceUniqueId(fromID);
+                } else if (prefs.getPreferredSide() == SlaveStreamPreferences.SIDE_RIGHT) {
+                    streamPrefRight.copyFrom(prefs);
+                    streamPrefRight.setDeviceUniqueId(fromID);
                 }
-            }
-        });
-        blaubot.addLifecycleListener(new ILifecycleListener() {
-            @Override
-            public void onDisconnected() {
-                // THIS device disconnected from the network
-                Log.i(TAG_BLAUBOT, "Disconnected.");
-            }
-
-            @Override
-            public void onDeviceLeft(IBlaubotDevice blaubotDevice) {
-                // ANOTHER device disconnected from the network
-            }
-
-            @Override
-            public void onDeviceJoined(IBlaubotDevice blaubotDevice) {
-                // ANOTHER device connected to the network THIS device is on
-            }
-
-            @Override
-            public void onConnected() {
-                // THIS device connected to a network
-                // you can now subscribe to channels and use them:
-                mainChannel.subscribe();
-                // onDeviceJoined(...) calls will follow for each OTHER device that was already connected
-            }
-
-            @Override
-            public void onPrinceDeviceChanged(IBlaubotDevice oldPrince, IBlaubotDevice newPrince) {
-                // if the network's king goes down, the prince will rule over the remaining peasants
-            }
-
-            @Override
-            public void onKingDeviceChanged(IBlaubotDevice oldKing, IBlaubotDevice newKing) {
-
             }
         });
 
@@ -231,9 +155,7 @@ public class MjpegActivity extends ActionBarActivity {
                 suspending = false;
             }
         }
-        blaubot.startBlaubot();
-        blaubot.registerReceivers(this);
-        blaubot.setContext(this);
+        BWARG_SERVER.onResume(this);
         //blaubot.onResume(this);
 
     }
@@ -241,9 +163,7 @@ public class MjpegActivity extends ActionBarActivity {
     public void onStart() {
         if (DEBUG) Log.d(TAG, "onStart()");
         super.onStart();
-        blaubot.startBlaubot();
-        blaubot.registerReceivers(this);
-        blaubot.setContext(this);
+        BWARG_SERVER.onResume(this);
         //blaubot.onResume(this);
     }
 
@@ -262,14 +182,13 @@ public class MjpegActivity extends ActionBarActivity {
                 suspending = true;
             }
         }
-        blaubot.unregisterReceivers(this);
-        blaubot.onPause(this);
+        //BWARG_SERVER.onPause(this);
     }
 
     public void onStop() {
         if (DEBUG) Log.d(TAG, "onStop()");
         super.onStop();
-        blaubot.stopBlaubot();
+        BWARG_SERVER.onStop();
     }
 
     public void onDestroy() {
@@ -281,7 +200,7 @@ public class MjpegActivity extends ActionBarActivity {
         if (mvRight != null) {
             mvRight.freeCameraMemory();
         }*/
-        blaubot.stopBlaubot();
+        BWARG_SERVER.onDestroy();
         SharedPreferences preferences = getSharedPreferences("SAVED_VALUES", MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         savePreferences(editor, streamPrefLeft, 1);
@@ -414,13 +333,12 @@ public class MjpegActivity extends ActionBarActivity {
         settings_intent.putExtra("stream_prefs2",gson.toJson(streamPrefRight));
 
         startActivityForResult(settings_intent, REQUEST_SETTINGS);
-
     }
     public void toggleExposureLock(View v) {
         AUTO_EXPOSURE_LOCK = !AUTO_EXPOSURE_LOCK;
 
         exposure_lock_button.setImageResource(AUTO_EXPOSURE_LOCK ? R.drawable.exposure_locked:R.drawable.exposure_unlocked);
-        mainChannel.publish(("AEL_[fromID]" + blaubot.getOwnDevice().getUniqueDeviceID() + "_[toID]" + "all" + "_[data]"+AUTO_EXPOSURE_LOCK).getBytes());
+        BWARG_SERVER.sendAEL(AUTO_EXPOSURE_LOCK);
     }
     public void setTv(int camNum, String s){
         if(camNum == 1){
@@ -432,7 +350,7 @@ public class MjpegActivity extends ActionBarActivity {
     public void setTv(int camNum, int string_ressource_id){
         setTv(camNum, getResources().getString(string_ressource_id));
     }
-    private static InetAddress tryGetIpV4Address()
+    public static InetAddress tryGetIpV4Address()
     {
         try
         {

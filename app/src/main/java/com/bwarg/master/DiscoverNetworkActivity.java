@@ -1,5 +1,6 @@
 package com.bwarg.master;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.nsd.NsdManager;
@@ -21,14 +22,19 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bwarg.master.network.SSPListener;
 import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
+
+import eu.hgross.blaubot.core.BlaubotDevice;
 
 
-public class DiscoverNetworkActivity extends ActionBarActivity{
+public class DiscoverNetworkActivity extends ActionBarActivity implements Observer{
     private final static String TAG = "DiscoverNetworkActivity";
     private static final int DISCOVER_PORT_DEF = 8888;
     public static boolean USE_NSD_MANAGER = false;
@@ -38,14 +44,6 @@ public class DiscoverNetworkActivity extends ActionBarActivity{
 
     private ListView mListView;
     public final static int REQUEST_SETTINGS_UDP = 1;
-
-    public final static String SERVICE_NAME_MASTER = "Master BWARG";
-    public final static String SERVICE_NAME = "BWARG";
-    public final static String SERVICE_TYPE = "_http._tcp.";
-
-    private NetworkClientTask clientTask;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,16 +74,19 @@ public class DiscoverNetworkActivity extends ActionBarActivity{
 
 
         });
-        //client.execute(this);
-        // NSD Stuff
-
-        /*if(discoveryTask!=null)
-            discoveryTask.closeNetworkDiscovery();
-        discoveryTask = new Task();
-        discoveryTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");*/
-        if(clientTask == null && USE_NSD_MANAGER)
-            clientTask = new NetworkClientTask();
-        clientTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
+        MjpegActivity.BWARG_SERVER.onCreate(this);
+        MjpegActivity.BWARG_SERVER.addSSPListener(new SSPListener() {
+            @Override
+            public void applySettings(SlaveStreamPreferences prefs, String uniqueID) {
+                boolean containsProfile = false;
+                for (int i = 0; i < profilesLists.size() && !containsProfile; i++) {
+                    containsProfile = profilesLists.get(i).getUniqueID().equals(uniqueID);
+                }
+                if (!containsProfile)
+                    addServerProfile(new ServerProfile(uniqueID, prefs.getName(), prefs.getIpAdress(), prefs.getIpPort()));
+            }
+        });
+        MjpegActivity.BWARG_SERVER.addObserver(this);
     }
     @Override
     protected void onStop()  {
@@ -95,12 +96,7 @@ public class DiscoverNetworkActivity extends ActionBarActivity{
             mNsdManager = null;
         }*/
         cAdapter.clear();
-        if(clientTask!= null){
-            clientTask.close();
-            clientTask = null;
-        }
-       /* if(discoveryTask!=null)
-            discoveryTask.closeNetworkDiscovery();*/
+        MjpegActivity.BWARG_SERVER.onStop();
         super.onStop();
     }
     @Override
@@ -110,50 +106,46 @@ public class DiscoverNetworkActivity extends ActionBarActivity{
             cAdapter.clear();
         }*/
         cAdapter.clear();
-        if(clientTask!= null){
-            clientTask.close();
-            clientTask = null;
-        }
-        /*if(discoveryTask!=null)
-            discoveryTask.closeNetworkDiscovery();*/
+        MjpegActivity.BWARG_SERVER.onPause(this);
         super.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        /*if (mNsdManager != null) {
-            mNsdManager.discoverServices(
-                    SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
-        }*/
-        if(clientTask == null && USE_NSD_MANAGER) {
-            clientTask = new NetworkClientTask();
-            clientTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");
-        }
-        /*discoveryTask = new Task();
-        discoveryTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "");*/
+
+        MjpegActivity.BWARG_SERVER.onResume(this);
     }
 
     @Override
     protected void onDestroy() {
-        /*if (mNsdManager != null) {
-            mNsdManager.stopServiceDiscovery(mDiscoveryListener);
-            mNsdManager = null;
-        }*/
-        if(clientTask!= null){
-            clientTask.close();
-            clientTask = null;
-        }
+        MjpegActivity.BWARG_SERVER.deleteObserver(this);
+        MjpegActivity.BWARG_SERVER.onDestroy();
+
         cAdapter.clear();
-       /* if(discoveryTask!=null)
-            discoveryTask.closeNetworkDiscovery();*/
         super.onDestroy();
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        Log.d("BwargServer","must delete : "+ ((BlaubotDevice)data).getUniqueDeviceID());
+        removeServerProfile(((BlaubotDevice) data).getUniqueDeviceID());
     }
 
     public class ServerProfile{
         private String device_name = StreamPreferences.UNKNOWN_NAME;
         private int[] ipTab = {0, 0, 0, 0, 8080};
+        private String uniqueID="none";
 
+        public ServerProfile(String uniqueID){
+            this.uniqueID = uniqueID;
+        }
+        public ServerProfile(String uniqueID, String name, String ip, int port){
+            this(uniqueID);
+            setIpNoPort(ip);
+            setPort(port);
+            setDevice_name(name);
+        }
         protected void setIpNoPort(String ip){
             int[] ipResult = new int[5];
             String temp = "";
@@ -186,6 +178,14 @@ public class DiscoverNetworkActivity extends ActionBarActivity{
 
         public String getDevice_name() {
             return device_name;
+        }
+
+        public String getUniqueID() {
+            return uniqueID;
+        }
+
+        public void setUniqueID(String uniqueID) {
+            this.uniqueID = uniqueID;
         }
 
         public void setDevice_name(String device_name) {
@@ -226,7 +226,39 @@ public class DiscoverNetworkActivity extends ActionBarActivity{
             }
         });
     }
-    public void clearServerProfiles(){
+    public void removeServerProfile(final ServerProfile serverProfile){
+        final ServerProfile pf = serverProfile;
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int index = profilesLists.indexOf(pf);
+                if(index != -1)
+                    cAdapter.remove(serverProfile);
+                return;
+            }
+        });
+    }
+    public void removeServerProfile(final String uniqueID){
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int index = -1;
+                int i= 0;
+                for(ServerProfile sp : profilesLists){
+                    if(sp.getUniqueID().equals(uniqueID)) {
+                        index = i;
+                        break;
+                    }
+                    i++;
+                }
+                if(index != -1)
+                    cAdapter.remove(profilesLists.get(index));
+                return;
+            }
+        });
+    }
+
+        public void clearServerProfiles(){
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -267,129 +299,5 @@ public class DiscoverNetworkActivity extends ActionBarActivity{
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-    protected class NetworkClientTask extends AsyncTask<String, Void, Void>{
-        private NsdManager mNsdManager;
-        private NsdServiceInfo mService;
-        NsdManager.ResolveListener mResolveListener = new NsdManager.ResolveListener() {
-
-            @Override
-            public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                // Called when the resolve fails. Use the error code to debug.
-                Log.e(TAG, "Resolve failed " + errorCode);
-                Log.e(TAG, "service = " + serviceInfo);
-            }
-
-            @Override
-            public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                Log.d(TAG, "Resolve Succeeded. " + serviceInfo);
-
-                if (serviceInfo.getServiceName().equals(SERVICE_NAME_MASTER)) {
-                    Log.d(TAG, "Same IP.");
-                    return;
-                }else if(serviceInfo.getServiceName().startsWith(SERVICE_NAME)){
-                    //SLAVE found!
-                    mService = serviceInfo;
-                    int port = mService.getPort();
-                    InetAddress host = mService.getHost();
-                    String name = serviceInfo.getServiceName().substring(SERVICE_NAME.length()).replace("\\032", " ");
-
-                    ServerProfile servProfile = new ServerProfile();
-                    servProfile.setIpNoPort(host.toString());
-                    servProfile.setPort(port);
-                    servProfile.setDevice_name(name);
-
-
-                    addServerProfile(servProfile);
-                }
-
-
-            }
-        };
-        NsdManager.DiscoveryListener mDiscoveryListener = new NsdManager.DiscoveryListener() {
-
-            // Called as soon as service discovery begins.
-            @Override
-            public void onDiscoveryStarted(String regType) {
-                Log.d(TAG, "Service discovery started");
-            }
-
-            @Override
-            public void onServiceFound(NsdServiceInfo service) {
-                // A service was found! Do something with it.
-                Log.d(TAG, "Service discovery success : " + service);
-                Log.d(TAG, "Host = "+ service.getServiceName());
-                Log.d(TAG, "port = " + String.valueOf(service.getPort()));
-
-                if (!service.getServiceType().equals(SERVICE_TYPE)) {
-                    // Service type is the string containing the protocol and
-                    // transport layer for this service.
-                    Log.d(TAG, "Unknown Service Type: " + service.getServiceType());
-                } else if (service.getServiceName().equals(SERVICE_NAME_MASTER)) {
-                    // The name of the service tells the user what they'd be
-                    // connecting to. It could be "Bob's Chat App".
-                    Log.d(TAG, "Same machine: " + SERVICE_NAME_MASTER);
-                } else {
-                    Log.d(TAG, "Diff Machine : " + service.getServiceName());
-                    // connect to the service and obtain serviceInfo
-                    mNsdManager.resolveService(service, mResolveListener);
-                }
-            }
-
-            @Override
-            public void onServiceLost(NsdServiceInfo service) {
-                // When the network service is no longer available.
-                // Internal bookkeeping code goes here.
-                Log.e(TAG, "service lost" + service);
-            }
-
-            @Override
-            public void onDiscoveryStopped(String serviceType) {
-                Log.i(TAG, "Discovery stopped: " + serviceType);
-            }
-
-            @Override
-            public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-                Log.e(TAG, "Discovery failed: Error code:" + errorCode);
-                mNsdManager.stopServiceDiscovery(this);
-                clearServerProfiles();
-            }
-
-            @Override
-            public void onStopDiscoveryFailed(String serviceType, int errorCode) {
-                Log.e(TAG, "Discovery failed: Error code:" + errorCode);
-                mNsdManager.stopServiceDiscovery(this);
-                cAdapter.clear();
-            }
-        };
-
-
-        @Override
-        protected Void doInBackground(String... params) {
-            if(mNsdManager ==null) {
-                mNsdManager = (NsdManager) getSystemService(Context.NSD_SERVICE);
-            }
-            while(!isCancelled()){
-                mNsdManager.discoverServices(SERVICE_TYPE,
-                        NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
-                mNsdManager.stopServiceDiscovery(mDiscoveryListener);
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            return null;
-        }
-        @Override
-        protected void onPostExecute(Void result){
-            close();
-        }
-        protected void close(){
-            cancel(true);
-            //mNsdManager.stopServiceDiscovery(mDiscoveryListener);
-            mNsdManager = null;
-        }
     }
 }

@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">BWARG (Master)</string>
-
     <string name="settings">Settings</string>
-
     <string name="resolution_label">Resolution</string>
     <string name="resolution_times"> x </string>
     <string name="camera">Camera</string>
@@ -147,4 +145,30 @@
         "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
         "when a user tries to pick up one of cards.\n\n"
     </string>
+    <string name="key_device_name">device_name</string>
+    <string name="action_settings">Settings</string>
+    <string name="resolution_spinner_label">Resolution : </string>
+    <string name="camera_label">Camera</string>
+    <string name="flash_light_label">Flash</string>
+    <string name="use_flash_label">Use flash</string>
+    <string name="server_port_label">Server Port</string>
+    <string name="server_name_label">Server Name</string>
+    <string name="quality_label">Quality</string>
+    <string name="image_label">Image</string>
+    <string name="camera_0_back">Back (Camera 0)</string>
+    <string name="camera_1_front">Front (Camera 1)</string>
+    <string name="lock_keys_checkbox">Lock physical buttons (experimental)</string>
+    <string name="image">Image</string>
+    <string name="open_image_settings">Open image settings</string>
+    <string name="capture_label">Capture</string>
+    <string name="white_balance">White balance</string>
+    <string name="auto_white_balance_lock">Auto white balance lock</string>
+    <string name="exposure_label">Exposure</string>
+    <string name="focus_mode_label">Focus mode</string>
+    <string name="iso_label">ISO</string>
+    <string name="extras_label">Extras</string>
+    <string name="image_stabilization_checkBox">Stabilize image</string>
+    <string name="auto_exposure_lock">Auto exposure lock</string>
+    <string name="mode_label">Mode : </string>
+    <string name="fast_fps_mode_checkbox">Fast FPS mode (recommended)</string>
 </resources>
