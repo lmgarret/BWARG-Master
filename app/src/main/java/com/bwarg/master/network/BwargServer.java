@@ -131,7 +131,8 @@ public class BwargServer extends Observable {
             public void onConnected() {
                 // THIS device connected to a network
                 // you can now subscribe to channels and use them:
-                mainChannel.subscribe();
+                //mainChannel.subscribe();
+                Log.d(TAG, "Connected.");
                 // onDeviceJoined(...) calls will follow for each OTHER device that was already connected
             }
 
