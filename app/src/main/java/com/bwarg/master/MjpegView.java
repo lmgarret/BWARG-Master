@@ -163,6 +163,9 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
 
                         c = mSurfaceHolder.lockCanvas();
                         synchronized (mSurfaceHolder) {
+                            if(camNum==1){
+                                c.rotate(180.0F, dispWidth/2, dispHeight/2);
+                            }
                             if(COMPENSATE_LENS_EFFECT) {
                                 //TODO implement fisheye effect
                                 c.drawBitmap(bmp, null, destRect, p);
@@ -170,8 +173,9 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
                             }else{
                                 c.drawBitmap(bmp, null, destRect, p);
                             }
-
-                            if (showFps) {
+                            if(camNum==1){
+                                c.rotate(180.0F, dispWidth/2, dispHeight/2);
+                            }                            if (showFps) {
                                 p.setXfermode(mode);
                                 if (ovl != null) {
 
